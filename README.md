@@ -70,7 +70,7 @@ sudo apt install qt5-default libqscintilla2-qt5-dev cmake build-essential
 
 ### Quick Build
 ```bash
-git clone https://github.com/yourusername/notepad-plus-plus-linux.git
+git clone https://github.com/mixelpixx/notepad-plus-plus-linux.git
 cd notepad-plus-plus-linux
 mkdir build
 cd build
@@ -276,5 +276,6 @@ export QT_STYLE_OVERRIDE=Fusion
 - **Documentation**: See the docs/ directory for detailed documentation
 
 ---
+
 
 **Notepad++ Linux** - Bringing the power of Notepad++ to the Linux desktop.
