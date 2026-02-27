@@ -1,0 +1,11 @@
+/home/empulse/repo/notepad-plus-plus/GITHUB/test-build/CMakeFiles/notepadplusplus.dir
+/home/empulse/repo/notepad-plus-plus/GITHUB/test-build/CMakeFiles/package.dir
+/home/empulse/repo/notepad-plus-plus/GITHUB/test-build/CMakeFiles/package_source.dir
+/home/empulse/repo/notepad-plus-plus/GITHUB/test-build/CMakeFiles/edit_cache.dir
+/home/empulse/repo/notepad-plus-plus/GITHUB/test-build/CMakeFiles/rebuild_cache.dir
+/home/empulse/repo/notepad-plus-plus/GITHUB/test-build/CMakeFiles/list_install_components.dir
+/home/empulse/repo/notepad-plus-plus/GITHUB/test-build/CMakeFiles/install.dir
+/home/empulse/repo/notepad-plus-plus/GITHUB/test-build/CMakeFiles/install/local.dir
+/home/empulse/repo/notepad-plus-plus/GITHUB/test-build/CMakeFiles/install/strip.dir
+/home/empulse/repo/notepad-plus-plus/GITHUB/test-build/CMakeFiles/notepadplusplus_autogen_timestamp_deps.dir
+/home/empulse/repo/notepad-plus-plus/GITHUB/test-build/CMakeFiles/notepadplusplus_autogen.dir
