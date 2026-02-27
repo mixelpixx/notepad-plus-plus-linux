@@ -70,6 +70,7 @@ private:
     
     void initializeApplication();
     void setupAutoSave();
+    void setupBackup();
     void setupFileWatchers();
 }; 
 

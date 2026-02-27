@@ -21,6 +21,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QTabWidget>
+#include <QStandardPaths>
 #include <QDialogButtonBox>
 #include <QHeaderView>
 #include <QSplitter>
@@ -381,7 +382,10 @@ void PreferencesDialog::createBackupPage()
     
     m_backupOnSaveCheck = new QCheckBox(tr("Backup on save"), backupGroup);
     backupLayout->addWidget(m_backupOnSaveCheck, 4, 0, 1, 2);
-    
+
+    // Connect browse button
+    connect(m_browseBackupButton, &QPushButton::clicked, this, &PreferencesDialog::onBrowseBackupDirectory);
+
     layout->addWidget(backupGroup);
     layout->addStretch();
 }
@@ -589,7 +593,14 @@ void PreferencesDialog::loadSettings()
     m_startupSessionCheck->setChecked(config.isSessionRestoreEnabled());
     m_autoSaveCheck->setChecked(config.isAutoSaveEnabled());
     m_autoSaveIntervalSpin->setValue(config.getAutoSaveInterval());
-    
+
+    // Backup settings
+    m_enableBackupCheck->setChecked(config.isBackupEnabled());
+    m_backupDirEdit->setText(config.getBackupDirectory());
+    m_backupIntervalSpin->setValue(config.getBackupInterval());
+    m_maxBackupFilesSpin->setValue(config.getMaxBackupFiles());
+    m_backupOnSaveCheck->setChecked(config.isBackupOnSaveEnabled());
+
     // Editor settings
     m_tabSizeSpin->setValue(config.getTabSize());
     m_tabsToSpacesCheck->setChecked(config.isTabsToSpacesEnabled());
@@ -616,7 +627,14 @@ void PreferencesDialog::saveSettings()
     config.setSessionRestoreEnabled(m_startupSessionCheck->isChecked());
     config.setAutoSaveEnabled(m_autoSaveCheck->isChecked());
     config.setAutoSaveInterval(m_autoSaveIntervalSpin->value());
-    
+
+    // Backup settings
+    config.setBackupEnabled(m_enableBackupCheck->isChecked());
+    config.setBackupDirectory(m_backupDirEdit->text());
+    config.setBackupInterval(m_backupIntervalSpin->value());
+    config.setMaxBackupFiles(m_maxBackupFilesSpin->value());
+    config.setBackupOnSaveEnabled(m_backupOnSaveCheck->isChecked());
+
     // Editor settings
     config.setTabSize(m_tabSizeSpin->value());
     config.setTabsToSpacesEnabled(m_tabsToSpacesCheck->isChecked());
@@ -712,11 +730,27 @@ void PreferencesDialog::onExportSettings()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
         tr("Export Settings"), "notepadplusplus_settings.ini", tr("Settings Files (*.ini)"));
-    
+
     if (!fileName.isEmpty()) {
         // TODO: Implement settings export
         QMessageBox::information(this, tr("Export Settings"),
             tr("Settings exported successfully to %1").arg(fileName));
+    }
+}
+
+void PreferencesDialog::onBrowseBackupDirectory()
+{
+    QString currentDir = m_backupDirEdit->text();
+    if (currentDir.isEmpty()) {
+        currentDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    }
+
+    QString directory = QFileDialog::getExistingDirectory(this,
+        tr("Select Backup Directory"), currentDir,
+        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+    if (!directory.isEmpty()) {
+        m_backupDirEdit->setText(directory);
     }
 }
 

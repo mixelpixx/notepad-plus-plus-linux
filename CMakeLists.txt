@@ -46,6 +46,7 @@ set(SOURCES
     core/Macro.cpp
     core/MacroStorage.cpp
     core/MacroManager.cpp
+    core/BackupManager.cpp
     platform/LinuxPlatform.cpp
     utils/ConfigManager.cpp
     ui/FindReplaceDialog.cpp
@@ -63,6 +64,7 @@ set(HEADERS
     core/Macro.h
     core/MacroStorage.h
     core/MacroManager.h
+    core/BackupManager.h
     platform/PlatformInterface.h
     utils/ConfigManager.h
     ui/FindReplaceDialog.h

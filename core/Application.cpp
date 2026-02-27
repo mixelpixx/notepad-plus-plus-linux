@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "MainWindow.h"
+#include "BackupManager.h"
 #include "../platform/PlatformInterface.h"
 #include "../utils/ConfigManager.h"
 #include <QCoreApplication>
@@ -35,7 +36,10 @@ void Application::initializeApplication()
     
     // Setup auto-save timer
     setupAutoSave();
-    
+
+    // Setup backup system
+    setupBackup();
+
     // Setup file watchers
     setupFileWatchers();
     
@@ -69,11 +73,16 @@ bool Application::openFile(const QString& filePath)
 bool Application::saveFile(const QString& filePath)
 {
     bool result = m_mainWindow->saveFile(filePath);
-    
+
     if (result) {
         emit fileSaved(filePath);
+
+        // Create backup on save if enabled
+        if (ConfigManager::instance().isBackupOnSaveEnabled()) {
+            BackupManager::instance().createBackup(filePath);
+        }
     }
-    
+
     return result;
 }
 
@@ -264,7 +273,22 @@ void Application::onAutoSave()
 
 void Application::onBackupFiles()
 {
-    // TODO: Implement backup functionality
+    if (!ConfigManager::instance().isBackupEnabled()) {
+        return;
+    }
+
+    // Backup all open files
+    int fileCount = m_mainWindow->getOpenFileCount();
+
+    for (int i = 0; i < fileCount; ++i) {
+        QString filePath = m_mainWindow->getFilePath(i);
+
+        if (!filePath.isEmpty() && QFile::exists(filePath)) {
+            BackupManager::instance().createBackup(filePath);
+        }
+    }
+
+    qDebug() << "Periodic backup completed for" << fileCount << "files";
 }
 
 void Application::setupAutoSave()
@@ -282,9 +306,39 @@ void Application::setupFileWatchers()
 {
     QFileSystemWatcher *watcher = new QFileSystemWatcher(this);
     connect(watcher, &QFileSystemWatcher::fileChanged, this, &Application::onFileModified);
-    
+
     // Watcher will be updated as files are opened/closed
     m_mainWindow->setFileWatcher(watcher);
+}
+
+void Application::setupBackup()
+{
+    // Connect backup manager signals
+    connect(&BackupManager::instance(), &BackupManager::backupCreated,
+            this, [](const QString& filePath) {
+        if (!filePath.isEmpty()) {
+            qDebug() << "Backup created for:" << filePath;
+        }
+    });
+
+    connect(&BackupManager::instance(), &BackupManager::backupFailed,
+            this, [](const QString& filePath, const QString& error) {
+        qWarning() << "Backup failed for" << filePath << ":" << error;
+    });
+
+    // Setup periodic backup timer
+    BackupManager::instance().startPeriodicBackup();
+
+    // Connect periodic backup to our backup handler
+    connect(&BackupManager::instance(), &BackupManager::backupCreated,
+            this, [this](const QString& filePath) {
+        if (filePath.isEmpty()) {
+            // Empty path means periodic backup was triggered
+            onBackupFiles();
+        }
+    });
+
+    qDebug() << "Backup system initialized";
 }
 
 } // namespace NotepadPlusPlus

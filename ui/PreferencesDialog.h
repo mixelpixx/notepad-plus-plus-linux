@@ -46,6 +46,7 @@ private slots:
     void onLanguageAssociation();
     void onImportSettings();
     void onExportSettings();
+    void onBrowseBackupDirectory();
 
 private:
     void setupUi();

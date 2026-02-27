@@ -29,10 +29,19 @@ public:
     
     bool isBackupEnabled() const;
     void setBackupEnabled(bool enabled);
-    
+
     QString getBackupDirectory() const;
     void setBackupDirectory(const QString& dir);
-    
+
+    int getBackupInterval() const; // in minutes
+    void setBackupInterval(int minutes);
+
+    int getMaxBackupFiles() const;
+    void setMaxBackupFiles(int count);
+
+    bool isBackupOnSaveEnabled() const;
+    void setBackupOnSaveEnabled(bool enabled);
+
     // Editor settings
     int getTabSize() const;
     void setTabSize(int size);

@@ -89,6 +89,36 @@ void ConfigManager::setBackupDirectory(const QString& dir)
     m_settings->setValue("General/BackupDirectory", dir);
 }
 
+int ConfigManager::getBackupInterval() const
+{
+    return m_settings->value("General/BackupInterval", 10).toInt();
+}
+
+void ConfigManager::setBackupInterval(int minutes)
+{
+    m_settings->setValue("General/BackupInterval", minutes);
+}
+
+int ConfigManager::getMaxBackupFiles() const
+{
+    return m_settings->value("General/MaxBackupFiles", 10).toInt();
+}
+
+void ConfigManager::setMaxBackupFiles(int count)
+{
+    m_settings->setValue("General/MaxBackupFiles", count);
+}
+
+bool ConfigManager::isBackupOnSaveEnabled() const
+{
+    return m_settings->value("General/BackupOnSave", false).toBool();
+}
+
+void ConfigManager::setBackupOnSaveEnabled(bool enabled)
+{
+    m_settings->setValue("General/BackupOnSave", enabled);
+}
+
 int ConfigManager::getTabSize() const
 {
     return m_settings->value("Editor/TabSize", 4).toInt();
