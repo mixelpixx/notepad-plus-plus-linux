@@ -74,7 +74,12 @@ public:
     // Generic get/set
     QVariant getValue(const QString& section, const QString& key, const QVariant& defaultValue = QVariant()) const;
     void setValue(const QString& section, const QString& key, const QVariant& value);
-    
+
+    // Import/Export
+    bool exportSettings(const QString& filePath);
+    bool importSettings(const QString& filePath);
+    QString getSettingsFilePath() const;
+
 private:
     ConfigManager();
     ~ConfigManager();

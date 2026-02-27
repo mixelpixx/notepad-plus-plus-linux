@@ -22,6 +22,8 @@
 #include <QMessageBox>
 #include <QTabWidget>
 #include <QStandardPaths>
+#include <QDir>
+#include <QFileInfo>
 #include <QDialogButtonBox>
 #include <QHeaderView>
 #include <QSplitter>
@@ -716,25 +718,72 @@ void PreferencesDialog::onLanguageAssociation()
 
 void PreferencesDialog::onImportSettings()
 {
-    QString fileName = QFileDialog::getOpenFileName(this, 
+    QString fileName = QFileDialog::getOpenFileName(this,
         tr("Import Settings"), QString(), tr("Settings Files (*.ini)"));
-    
-    if (!fileName.isEmpty()) {
-        // TODO: Implement settings import
-        QMessageBox::information(this, tr("Import Settings"), 
-            tr("Settings imported successfully from %1").arg(fileName));
+
+    if (fileName.isEmpty()) {
+        return;
+    }
+
+    // Confirm import
+    int result = QMessageBox::question(this, tr("Import Settings"),
+        tr("This will overwrite your current settings. Do you want to continue?"),
+        QMessageBox::Yes | QMessageBox::No);
+
+    if (result != QMessageBox::Yes) {
+        return;
+    }
+
+    // Import settings using ConfigManager
+    ConfigManager& config = ConfigManager::instance();
+
+    if (config.importSettings(fileName)) {
+        // Reload UI with imported settings
+        loadSettings();
+
+        QMessageBox::information(this, tr("Import Successful"),
+            tr("Successfully imported settings from:\n%1\n\n"
+               "Please restart the application for all changes to take effect.")
+               .arg(QFileInfo(fileName).fileName()));
+    } else {
+        QMessageBox::critical(this, tr("Import Failed"),
+            tr("Failed to import settings from:\n%1\n\n"
+               "The file may be corrupt or in an invalid format.").arg(fileName));
     }
 }
 
 void PreferencesDialog::onExportSettings()
 {
-    QString fileName = QFileDialog::getSaveFileName(this,
-        tr("Export Settings"), "notepadplusplus_settings.ini", tr("Settings Files (*.ini)"));
+    // Get default export location
+    QString defaultPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    defaultPath = QDir(defaultPath).filePath("notepadplusplus_settings.ini");
 
-    if (!fileName.isEmpty()) {
-        // TODO: Implement settings export
-        QMessageBox::information(this, tr("Export Settings"),
-            tr("Settings exported successfully to %1").arg(fileName));
+    QString fileName = QFileDialog::getSaveFileName(this,
+        tr("Export Settings"), defaultPath, tr("Settings Files (*.ini)"));
+
+    if (fileName.isEmpty()) {
+        return;
+    }
+
+    // Ensure .ini extension
+    if (!fileName.endsWith(".ini", Qt::CaseInsensitive)) {
+        fileName += ".ini";
+    }
+
+    // Save current UI state to ConfigManager first
+    saveSettings();
+
+    // Export settings using ConfigManager
+    ConfigManager& config = ConfigManager::instance();
+
+    if (config.exportSettings(fileName)) {
+        QMessageBox::information(this, tr("Export Successful"),
+            tr("Successfully exported settings to:\n%1\n\n"
+               "You can use this file to restore your settings later or "
+               "share them with another installation.").arg(fileName));
+    } else {
+        QMessageBox::critical(this, tr("Export Failed"),
+            tr("Failed to export settings to:\n%1").arg(fileName));
     }
 }
 

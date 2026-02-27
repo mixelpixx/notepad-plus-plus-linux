@@ -1,6 +1,7 @@
 #include "ConfigManager.h"
 #include <QStandardPaths>
 #include <QDir>
+#include <QDebug>
 
 namespace NotepadPlusPlus {
 
@@ -217,6 +218,82 @@ QVariant ConfigManager::getValue(const QString& section, const QString& key, con
 void ConfigManager::setValue(const QString& section, const QString& key, const QVariant& value)
 {
     m_settings->setValue(section + "/" + key, value);
+}
+
+bool ConfigManager::exportSettings(const QString& filePath)
+{
+    // Create export file
+    QSettings exportSettings(filePath, QSettings::IniFormat);
+
+    // Get all groups from current settings
+    QStringList groups = m_settings->childGroups();
+    int exportedCount = 0;
+
+    for (const QString& group : groups) {
+        m_settings->beginGroup(group);
+        exportSettings.beginGroup(group);
+
+        QStringList keys = m_settings->childKeys();
+        for (const QString& key : keys) {
+            QVariant value = m_settings->value(key);
+            exportSettings.setValue(key, value);
+            exportedCount++;
+        }
+
+        exportSettings.endGroup();
+        m_settings->endGroup();
+    }
+
+    exportSettings.sync();
+
+    qDebug() << "Exported" << exportedCount << "settings to" << filePath;
+    return exportSettings.status() == QSettings::NoError;
+}
+
+bool ConfigManager::importSettings(const QString& filePath)
+{
+    QSettings importSettings(filePath, QSettings::IniFormat);
+
+    if (importSettings.status() != QSettings::NoError) {
+        qWarning() << "Failed to read settings file:" << filePath;
+        return false;
+    }
+
+    // Get all groups from import file
+    QStringList groups = importSettings.childGroups();
+
+    if (groups.isEmpty()) {
+        qWarning() << "Import file contains no settings:" << filePath;
+        return false;
+    }
+
+    // Copy all settings
+    int importedCount = 0;
+
+    for (const QString& group : groups) {
+        importSettings.beginGroup(group);
+        m_settings->beginGroup(group);
+
+        QStringList keys = importSettings.childKeys();
+        for (const QString& key : keys) {
+            QVariant value = importSettings.value(key);
+            m_settings->setValue(key, value);
+            importedCount++;
+        }
+
+        m_settings->endGroup();
+        importSettings.endGroup();
+    }
+
+    m_settings->sync();
+
+    qDebug() << "Imported" << importedCount << "settings from" << filePath;
+    return true;
+}
+
+QString ConfigManager::getSettingsFilePath() const
+{
+    return m_settings->fileName();
 }
 
 } // namespace NotepadPlusPlus
