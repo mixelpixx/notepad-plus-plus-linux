@@ -123,7 +123,7 @@ void PreferencesDialog::createGeneralPage()
     
     langLayout->addWidget(new QLabel(tr("Language:"), languageGroup), 0, 0);
     m_languageCombo = new QComboBox(languageGroup);
-    m_languageCombo->addItems({"English", "Español", "Français", "Deutsch", "中文", "日本語", "Русский"});
+    m_languageCombo->addItems({"System", "English", "Deutsch", "Español", "Français", "中文", "日本語", "Русский"});
     langLayout->addWidget(m_languageCombo, 0, 1);
     
     layout->addWidget(languageGroup);
@@ -595,6 +595,14 @@ void PreferencesDialog::loadSettings()
     m_startupSessionCheck->setChecked(config.isSessionRestoreEnabled());
     m_autoSaveCheck->setChecked(config.isAutoSaveEnabled());
     m_autoSaveIntervalSpin->setValue(config.getAutoSaveInterval());
+    
+    // Language settings
+    QString language = config.getLanguage();
+    m_originalLanguage = language; // Store original value
+    int langIndex = m_languageCombo->findText(language);
+    if (langIndex >= 0) {
+        m_languageCombo->setCurrentIndex(langIndex);
+    }
 
     // Backup settings
     m_enableBackupCheck->setChecked(config.isBackupEnabled());
@@ -625,10 +633,17 @@ void PreferencesDialog::saveSettings()
 {
     ConfigManager& config = ConfigManager::instance();
     
+    // Check if language changed
+    QString newLanguage = m_languageCombo->currentText();
+    bool languageChanged = (newLanguage != m_originalLanguage);
+    
     // General settings
     config.setSessionRestoreEnabled(m_startupSessionCheck->isChecked());
     config.setAutoSaveEnabled(m_autoSaveCheck->isChecked());
     config.setAutoSaveInterval(m_autoSaveIntervalSpin->value());
+    
+    // Language settings
+    config.setLanguage(newLanguage);
 
     // Backup settings
     config.setBackupEnabled(m_enableBackupCheck->isChecked());
@@ -649,6 +664,13 @@ void PreferencesDialog::saveSettings()
     config.setTheme(m_themeCombo->currentText());
     
     config.save();
+    
+    // Show restart warning if language changed
+    if (languageChanged) {
+        QMessageBox::information(this, tr("Language Changed"), 
+            tr("Language has been changed to %1.\n\nPlease restart the application for the change to take effect.")
+            .arg(newLanguage));
+    }
 }
 
 void PreferencesDialog::applySettings()

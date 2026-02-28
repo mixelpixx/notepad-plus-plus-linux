@@ -71,6 +71,10 @@ public:
     QString getTheme() const;
     void setTheme(const QString& theme);
     
+    // Language settings
+    QString getLanguage() const;
+    void setLanguage(const QString& language);
+    
     // Generic get/set
     QVariant getValue(const QString& section, const QString& key, const QVariant& defaultValue = QVariant()) const;
     void setValue(const QString& section, const QString& key, const QVariant& value);

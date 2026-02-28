@@ -120,6 +120,14 @@ install(DIRECTORY docs/
     COMPONENT Documentation
 )
 
+# Install translations
+install(FILES 
+    translations/notepadplusplus_de.qm
+    DESTINATION share/notepadplusplus/translations
+    COMPONENT Translations
+    OPTIONAL
+)
+
 # CPack configuration
 include(CPack)
 set(CPACK_PACKAGE_NAME "notepadplusplus")

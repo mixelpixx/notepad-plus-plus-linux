@@ -161,6 +161,9 @@ private:
     QPushButton* m_cancelButton;
     QPushButton* m_applyButton;
     QPushButton* m_resetButton;
+    
+    // Internal state
+    QString m_originalLanguage; // Track original language setting
 };
 
 } // namespace NotepadPlusPlus
