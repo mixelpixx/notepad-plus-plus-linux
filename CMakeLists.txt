@@ -19,6 +19,9 @@ endif()
 
 # Find Qt6 (or Qt5 as fallback)
 find_package(Qt6 COMPONENTS Core Widgets Xml QUIET)
+if(Qt6_FOUND)
+    find_package(Qt6 COMPONENTS Svg QUIET)
+endif()
 if(NOT Qt6_FOUND)
     find_package(Qt5 5.15 COMPONENTS Core Widgets Xml REQUIRED)
     set(QSCINTILLA_LIB qscintilla2_qt5)
@@ -34,6 +37,15 @@ if(NOT QSCINTILLA_LIBRARY)
     message(FATAL_ERROR "QScintilla library not found. Install libqscintilla2-qt6-dev (or qt5 version)")
 else()
     message(STATUS "Found QScintilla: ${QSCINTILLA_LIBRARY}")
+endif()
+
+# QScintilla headers (global, also needed by AUTOMOC)
+if(Qt6_FOUND)
+    include_directories(/usr/include/aarch64-linux-gnu/qt6)
+    add_compile_options(-I/usr/include/aarch64-linux-gnu/qt6)
+else()
+    include_directories(/usr/include/x86_64-linux-gnu/qt5)
+    add_compile_options(-I/usr/include/x86_64-linux-gnu/qt5)
 endif()
 
 # Source files
@@ -74,12 +86,28 @@ set(HEADERS
     ui/PreferencesDialog.h
 )
 
+# Embed resources (icons)
+if(Qt6_FOUND)
+    qt_add_resources(RESOURCES resources/resources.qrc)
+else()
+    qt5_add_resources(RESOURCES resources/resources.qrc)
+endif()
+
 # Create executable
-add_executable(notepadplusplus ${SOURCES} ${HEADERS})
+add_executable(notepadplusplus ${SOURCES} ${HEADERS} ${RESOURCES})
 
 # Link Qt libraries
 if(Qt6_FOUND)
-    target_link_libraries(notepadplusplus Qt6::Core Qt6::Widgets Qt6::Xml ${QSCINTILLA_LIBRARY})
+    if(Qt6Svg_FOUND)
+        target_link_libraries(notepadplusplus Qt6::Core Qt6::Widgets Qt6::Xml Qt6::Svg ${QSCINTILLA_LIBRARY})
+        message(STATUS "Qt6::Svg linked - SVG icons enabled")
+    else()
+        target_link_libraries(notepadplusplus Qt6::Core Qt6::Widgets Qt6::Xml ${QSCINTILLA_LIBRARY})
+        message(STATUS "Qt6::Svg not found - SVG icons may not render")
+    endif()
+    target_include_directories(notepadplusplus PRIVATE
+        /usr/include/aarch64-linux-gnu/qt6
+    )
 else()
     target_link_libraries(notepadplusplus Qt5::Core Qt5::Widgets Qt5::Xml ${QSCINTILLA_LIBRARY})
 endif()
