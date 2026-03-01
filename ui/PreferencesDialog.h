@@ -43,6 +43,7 @@ private slots:
     void onFontChanged();
     void onColorChanged();
     void onThemeChanged();
+    void onLanguageChanged(const QString& newLanguage);
     void onLanguageAssociation();
     void onImportSettings();
     void onExportSettings();

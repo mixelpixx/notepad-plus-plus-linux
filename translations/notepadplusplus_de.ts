@@ -1839,18 +1839,18 @@ Möchten Sie Ihre Änderungen speichern?</translation>
         <translation>Einstellungen exportieren...</translation>
     </message>
     <message>
-        <location filename="../ui/PreferencesDialog.cpp" line="670" />
-        <source>Language Changed</source>
-        <translation>Sprache geändert</translation>
+        <location filename="../ui/PreferencesDialog.cpp" line="630" />
+        <source>Change Language</source>
+        <translation>Sprache wechseln</translation>
     </message>
     <message>
-        <location filename="../ui/PreferencesDialog.cpp" line="671" />
-        <source>Language has been changed to %1.
+        <location filename="../ui/PreferencesDialog.cpp" line="632" />
+        <source>Switch language to %1?
 
-Please restart the application for the change to take effect.</source>
-        <translation>Die Sprache wurde auf %1 geändert.
+The application will restart immediately.</source>
+        <translation>Sprache auf %1 wechseln?
 
-Bitte starten Sie die Anwendung neu, damit die Änderung wirksam wird.</translation>
+Die Anwendung wird sofort neu gestartet.</translation>
     </message>
     <message>
         <location filename="../ui/PreferencesDialog.cpp" line="698" />
