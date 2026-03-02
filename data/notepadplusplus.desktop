@@ -1,7 +1,7 @@
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Notepad++ Linux
+Name=Notepad++
 GenericName=Text Editor
 Comment=Powerful text editor for Linux - Notepad++ port
 Exec=notepadplusplus %F
