@@ -17,6 +17,7 @@
 #include <QFileSystemWatcher>
 #include <QTextStream>
 #include <QLabel>
+#include <QFile>
 #include <QActionGroup>
 #include <QDebug>
 
@@ -98,15 +99,22 @@ void MainWindow::setupUi()
 void MainWindow::createActions()
 {
     // File actions
-    m_newAction = new QAction(QIcon::fromTheme("document-new"), tr("&New"), this);
+    // Helper lambda: prefer bundled icon, fall back to system theme
+    auto appIcon = [](const QString& name) {
+        QString path = QStringLiteral(":/icons/") + name + QStringLiteral(".svg");
+        if (QFile::exists(path)) return QIcon(path);
+        return QIcon::fromTheme(name);
+    };
+
+    m_newAction = new QAction(appIcon("document-new"), tr("&New"), this);
     m_newAction->setShortcut(QKeySequence::New);
     m_newAction->setStatusTip(tr("Create a new file"));
     
-    m_openAction = new QAction(QIcon::fromTheme("document-open"), tr("&Open..."), this);
+    m_openAction = new QAction(appIcon("document-open"), tr("&Open..."), this);
     m_openAction->setShortcut(QKeySequence::Open);
     m_openAction->setStatusTip(tr("Open an existing file"));
     
-    m_saveAction = new QAction(QIcon::fromTheme("document-save"), tr("&Save"), this);
+    m_saveAction = new QAction(appIcon("document-save"), tr("&Save"), this);
     m_saveAction->setShortcut(QKeySequence::Save);
     m_saveAction->setStatusTip(tr("Save the current file"));
     
@@ -114,7 +122,7 @@ void MainWindow::createActions()
     m_saveAsAction->setShortcut(QKeySequence::SaveAs);
     m_saveAsAction->setStatusTip(tr("Save the current file with a new name"));
     
-    m_saveAllAction = new QAction(tr("Save A&ll"), this);
+    m_saveAllAction = new QAction(appIcon("document-save-all"), tr("Save A&ll"), this);
     m_saveAllAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_S));
     m_saveAllAction->setStatusTip(tr("Save all open files"));
     
@@ -131,23 +139,23 @@ void MainWindow::createActions()
     m_exitAction->setStatusTip(tr("Exit the application"));
     
     // Edit actions
-    m_undoAction = new QAction(QIcon::fromTheme("edit-undo"), tr("&Undo"), this);
+    m_undoAction = new QAction(appIcon("edit-undo"), tr("&Undo"), this);
     m_undoAction->setShortcut(QKeySequence::Undo);
     m_undoAction->setStatusTip(tr("Undo the last action"));
     
-    m_redoAction = new QAction(QIcon::fromTheme("edit-redo"), tr("&Redo"), this);
+    m_redoAction = new QAction(appIcon("edit-redo"), tr("&Redo"), this);
     m_redoAction->setShortcut(QKeySequence::Redo);
     m_redoAction->setStatusTip(tr("Redo the last undone action"));
     
-    m_cutAction = new QAction(QIcon::fromTheme("edit-cut"), tr("Cu&t"), this);
+    m_cutAction = new QAction(appIcon("edit-cut"), tr("Cu&t"), this);
     m_cutAction->setShortcut(QKeySequence::Cut);
     m_cutAction->setStatusTip(tr("Cut the selected text"));
     
-    m_copyAction = new QAction(QIcon::fromTheme("edit-copy"), tr("&Copy"), this);
+    m_copyAction = new QAction(appIcon("edit-copy"), tr("&Copy"), this);
     m_copyAction->setShortcut(QKeySequence::Copy);
     m_copyAction->setStatusTip(tr("Copy the selected text"));
     
-    m_pasteAction = new QAction(QIcon::fromTheme("edit-paste"), tr("&Paste"), this);
+    m_pasteAction = new QAction(appIcon("edit-paste"), tr("&Paste"), this);
     m_pasteAction->setShortcut(QKeySequence::Paste);
     m_pasteAction->setStatusTip(tr("Paste text from clipboard"));
     
@@ -155,15 +163,15 @@ void MainWindow::createActions()
     m_selectAllAction->setShortcut(QKeySequence::SelectAll);
     m_selectAllAction->setStatusTip(tr("Select all text"));
     
-    m_findAction = new QAction(QIcon::fromTheme("edit-find"), tr("&Find..."), this);
+    m_findAction = new QAction(appIcon("edit-find"), tr("&Find..."), this);
     m_findAction->setShortcut(QKeySequence::Find);
     m_findAction->setStatusTip(tr("Find text in the current file"));
     
-    m_replaceAction = new QAction(QIcon::fromTheme("edit-find-replace"), tr("&Replace..."), this);
+    m_replaceAction = new QAction(appIcon("edit-find-replace"), tr("&Replace..."), this);
     m_replaceAction->setShortcut(QKeySequence::Replace);
     m_replaceAction->setStatusTip(tr("Find and replace text"));
     
-    m_findInFilesAction = new QAction(QIcon::fromTheme("folder-open"), tr("Find in &Files..."), this);
+    m_findInFilesAction = new QAction(appIcon("system-search"), tr("Find in &Files..."), this);
     m_findInFilesAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_F));
     m_findInFilesAction->setStatusTip(tr("Search for text in multiple files"));
     
@@ -185,11 +193,11 @@ void MainWindow::createActions()
     m_documentMapAction->setCheckable(true);
     m_documentMapAction->setStatusTip(tr("Toggle document map panel"));
     
-    m_zoomInAction = new QAction(QIcon::fromTheme("zoom-in"), tr("Zoom &In"), this);
+    m_zoomInAction = new QAction(appIcon("zoom-in"), tr("Zoom &In"), this);
     m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
     m_zoomInAction->setStatusTip(tr("Increase text size"));
     
-    m_zoomOutAction = new QAction(QIcon::fromTheme("zoom-out"), tr("Zoom &Out"), this);
+    m_zoomOutAction = new QAction(appIcon("zoom-out"), tr("Zoom &Out"), this);
     m_zoomOutAction->setShortcut(QKeySequence::ZoomOut);
     m_zoomOutAction->setStatusTip(tr("Decrease text size"));
     
@@ -538,6 +546,7 @@ void MainWindow::createToolBars()
 {
     // File toolbar
     m_fileToolBar = addToolBar(tr("File"));
+    m_fileToolBar->setObjectName(QStringLiteral("FileToolBar"));
     m_fileToolBar->addAction(m_newAction);
     m_fileToolBar->addAction(m_openAction);
     m_fileToolBar->addAction(m_saveAction);
@@ -546,6 +555,7 @@ void MainWindow::createToolBars()
     
     // Edit toolbar
     m_editToolBar = addToolBar(tr("Edit"));
+    m_editToolBar->setObjectName(QStringLiteral("EditToolBar"));
     m_editToolBar->addAction(m_undoAction);
     m_editToolBar->addAction(m_redoAction);
     m_editToolBar->addSeparator();
@@ -555,6 +565,7 @@ void MainWindow::createToolBars()
     
     // Search toolbar
     m_searchToolBar = addToolBar(tr("Search"));
+    m_searchToolBar->setObjectName(QStringLiteral("SearchToolBar"));
     m_searchToolBar->addAction(m_findAction);
     m_searchToolBar->addAction(m_replaceAction);
     m_searchToolBar->addAction(m_findInFilesAction);

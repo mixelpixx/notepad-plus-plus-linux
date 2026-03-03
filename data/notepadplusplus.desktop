@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Notepad++
+GenericName=Text Editor
+Comment=Powerful text editor for Linux - Notepad++ port
+Exec=notepadplusplus %F
+Icon=notepadplusplus
+Terminal=false
+Categories=Development;Utility;TextEditor;
+MimeType=text/plain;text/x-c;text/x-c++;text/x-python;text/x-java;text/html;text/css;text/javascript;application/json;application/xml;
+Keywords=editor;text;notepad;development;
+StartupNotify=true
+StartupWMClass=notepadplusplus

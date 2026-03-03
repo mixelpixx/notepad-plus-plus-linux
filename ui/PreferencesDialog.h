@@ -43,6 +43,7 @@ private slots:
     void onFontChanged();
     void onColorChanged();
     void onThemeChanged();
+    void onLanguageChanged(const QString& newLanguage);
     void onLanguageAssociation();
     void onImportSettings();
     void onExportSettings();
@@ -161,6 +162,9 @@ private:
     QPushButton* m_cancelButton;
     QPushButton* m_applyButton;
     QPushButton* m_resetButton;
+    
+    // Internal state
+    QString m_originalLanguage; // Track original language setting
 };
 
 } // namespace NotepadPlusPlus

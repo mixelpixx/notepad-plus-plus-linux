@@ -37,3 +37,4 @@ Makefile
 # Package files
 *.deb
 *.rpm
+.history/
