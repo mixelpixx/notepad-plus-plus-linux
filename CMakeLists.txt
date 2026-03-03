@@ -156,6 +156,27 @@ install(FILES
     OPTIONAL
 )
 
+# Install desktop file
+install(FILES
+    data/notepadplusplus.desktop
+    DESTINATION share/applications
+    COMPONENT Runtime
+)
+
+# Install hicolor icons (scalable SVG + all pre-generated PNG sizes)
+install(FILES
+    data/icons/hicolor/scalable/apps/notepadplusplus.svg
+    DESTINATION share/icons/hicolor/scalable/apps
+    COMPONENT Runtime
+)
+foreach(size 16 22 24 32 48 64 96 128 256)
+    install(FILES
+        data/icons/hicolor/${size}x${size}/apps/notepadplusplus.png
+        DESTINATION share/icons/hicolor/${size}x${size}/apps
+        COMPONENT Runtime
+    )
+endforeach()
+
 # CPack configuration
 include(CPack)
 set(CPACK_PACKAGE_NAME "notepadplusplus")
