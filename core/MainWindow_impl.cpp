@@ -19,6 +19,7 @@
 #include <QCryptographicHash>
 #include <QRegularExpression>
 #include <QStatusBar>
+#include <QDebug>
 
 namespace NotepadPlusPlus {
 

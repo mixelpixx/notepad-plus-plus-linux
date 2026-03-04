@@ -123,7 +123,11 @@ bool EditorWidget::loadFile(const QString& filePath)
     }
     
     QTextStream stream(&file);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     stream.setEncoding(QStringConverter::Utf8);
+#else
+    stream.setCodec("UTF-8");
+#endif
     
     QString content = stream.readAll();
     file.close();
@@ -152,7 +156,11 @@ bool EditorWidget::saveFile(const QString& filePath)
     }
     
     QTextStream stream(&file);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     stream.setEncoding(QStringConverter::Utf8);
+#else
+    stream.setCodec("UTF-8");
+#endif
     
     stream << getText();
     file.close();

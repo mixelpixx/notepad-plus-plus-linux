@@ -57,7 +57,13 @@ int main(int argc, char *argv[])
     
     // Try to load Qt translations if not English
     if (!language.isEmpty()) {
-        if (qtTranslator.load("qt_" + locale, QLibraryInfo::path(QLibraryInfo::TranslationsPath))) {
+        if (qtTranslator.load("qt_" + locale,
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+            QLibraryInfo::path(QLibraryInfo::TranslationsPath)
+#else
+            QLibraryInfo::location(QLibraryInfo::TranslationsPath)
+#endif
+        )) {
             app.installTranslator(&qtTranslator);
         }
         

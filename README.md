@@ -1,5 +1,7 @@
 # Notepad++ Linux
 
+<img src="resources/images/notepad++linux3_600.png" width="400" alt="Notepad++ Linux"/>
+
 A native Linux port of the popular Notepad++ text editor, built with Qt6 and QScintilla to provide a familiar and powerful text editing experience on Linux systems.
 
 ## Overview
