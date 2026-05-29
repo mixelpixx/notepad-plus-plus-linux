@@ -25,6 +25,7 @@
 #include <QApplication>
 #include <QPixmap>
 #include <QSplitter>
+#include <QDebug>
 #include <algorithm>
 #include <random>
 #include <QSet>

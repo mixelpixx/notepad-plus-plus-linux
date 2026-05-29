@@ -27,6 +27,7 @@ DocumentMapPanel::DocumentMapPanel(QWidget *parent)
     setWidget(mainWidget);
     
     // Configure dock widget
+    setObjectName(QStringLiteral("DocumentMapPanel"));
     setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetClosable);
     setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     

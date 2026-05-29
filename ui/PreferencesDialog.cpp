@@ -28,6 +28,8 @@
 #include <QHeaderView>
 #include <QSplitter>
 #include <QTextEdit>
+#include <QProcess>
+#include <QCoreApplication>
 
 namespace NotepadPlusPlus {
 
@@ -123,8 +125,10 @@ void PreferencesDialog::createGeneralPage()
     
     langLayout->addWidget(new QLabel(tr("Language:"), languageGroup), 0, 0);
     m_languageCombo = new QComboBox(languageGroup);
-    m_languageCombo->addItems({"English", "Español", "Français", "Deutsch", "中文", "日本語", "Русский"});
+    m_languageCombo->addItems({"System", "English", "Deutsch", "Español", "Français", "中文", "日本語", "Русский"});
     langLayout->addWidget(m_languageCombo, 0, 1);
+    connect(m_languageCombo, &QComboBox::currentTextChanged,
+            this, &PreferencesDialog::onLanguageChanged);
     
     layout->addWidget(languageGroup);
     
@@ -595,6 +599,14 @@ void PreferencesDialog::loadSettings()
     m_startupSessionCheck->setChecked(config.isSessionRestoreEnabled());
     m_autoSaveCheck->setChecked(config.isAutoSaveEnabled());
     m_autoSaveIntervalSpin->setValue(config.getAutoSaveInterval());
+    
+    // Language settings
+    QString language = config.getLanguage();
+    m_originalLanguage = language; // Store original value
+    int langIndex = m_languageCombo->findText(language);
+    if (langIndex >= 0) {
+        m_languageCombo->setCurrentIndex(langIndex);
+    }
 
     // Backup settings
     m_enableBackupCheck->setChecked(config.isBackupEnabled());
@@ -621,6 +633,33 @@ void PreferencesDialog::loadSettings()
     }
 }
 
+void PreferencesDialog::onLanguageChanged(const QString& newLanguage)
+{
+    if (newLanguage == m_originalLanguage) return;
+
+    int ret = QMessageBox::question(
+        this,
+        tr("Change Language"),
+        tr("Switch language to %1?\n\nThe application will restart immediately.").arg(newLanguage),
+        QMessageBox::Ok | QMessageBox::Cancel
+    );
+
+    if (ret == QMessageBox::Ok) {
+        // Save language setting first
+        ConfigManager& config = ConfigManager::instance();
+        config.setLanguage(newLanguage);
+        config.save();
+        // Restart application
+        QProcess::startDetached(QCoreApplication::applicationFilePath(), QStringList());
+        QCoreApplication::quit();
+    } else {
+        // Revert combo without triggering signal again
+        QSignalBlocker blocker(m_languageCombo);
+        int idx = m_languageCombo->findText(m_originalLanguage);
+        if (idx >= 0) m_languageCombo->setCurrentIndex(idx);
+    }
+}
+
 void PreferencesDialog::saveSettings()
 {
     ConfigManager& config = ConfigManager::instance();
@@ -629,6 +668,9 @@ void PreferencesDialog::saveSettings()
     config.setSessionRestoreEnabled(m_startupSessionCheck->isChecked());
     config.setAutoSaveEnabled(m_autoSaveCheck->isChecked());
     config.setAutoSaveInterval(m_autoSaveIntervalSpin->value());
+    
+    // Language (already handled in onLanguageChanged, keep in sync)
+    config.setLanguage(m_languageCombo->currentText());
 
     // Backup settings
     config.setBackupEnabled(m_enableBackupCheck->isChecked());
