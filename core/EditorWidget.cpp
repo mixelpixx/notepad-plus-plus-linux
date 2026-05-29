@@ -583,6 +583,7 @@ void EditorWidget::setMultiEditEnabled(bool enabled)
     m_multiEditEnabled = enabled;
     m_editor->SendScintilla(QsciScintilla::SCI_SETMULTIPLESELECTION, enabled ? 1 : 0);
     m_editor->SendScintilla(QsciScintilla::SCI_SETADDITIONALSELECTIONTYPING, enabled ? 1 : 0);
+    m_editor->SendScintilla(QsciScintilla::SCI_SETMULTIPASTE, enabled ? 1 : 0);
 }
 
 bool EditorWidget::isMultiEditEnabled() const
