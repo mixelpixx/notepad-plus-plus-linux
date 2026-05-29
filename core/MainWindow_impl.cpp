@@ -23,6 +23,7 @@
 #include <QStatusBar>
 #include <QClipboard>
 #include <QApplication>
+#include <QSplitter>
 #include <algorithm>
 #include <random>
 #include <QSet>
@@ -2032,6 +2033,124 @@ void MainWindow::onInverseBookmarks()
     }
 
     statusBar()->showMessage(tr("Bookmarks inverted"), 2000);
+}
+
+// Split view implementations
+void MainWindow::onSplitHorizontal()
+{
+    m_splitter->setOrientation(Qt::Vertical);
+    m_secondTabWidget->show();
+    m_splitViewActive = true;
+    m_closeSplitViewAction->setEnabled(true);
+    m_moveToOtherViewAction->setEnabled(true);
+    m_cloneToOtherViewAction->setEnabled(true);
+    m_focusOtherViewAction->setEnabled(true);
+    if (m_secondTabWidget->count() == 0) {
+        EditorWidget* editor = createEditor();
+        m_secondTabWidget->addTab(editor, tr("Untitled %1").arg(m_untitledCounter++));
+    }
+    statusBar()->showMessage(tr("Split view: horizontal"), 2000);
+}
+
+void MainWindow::onSplitVertical()
+{
+    m_splitter->setOrientation(Qt::Horizontal);
+    m_secondTabWidget->show();
+    m_splitViewActive = true;
+    m_closeSplitViewAction->setEnabled(true);
+    m_moveToOtherViewAction->setEnabled(true);
+    m_cloneToOtherViewAction->setEnabled(true);
+    m_focusOtherViewAction->setEnabled(true);
+    if (m_secondTabWidget->count() == 0) {
+        EditorWidget* editor = createEditor();
+        m_secondTabWidget->addTab(editor, tr("Untitled %1").arg(m_untitledCounter++));
+    }
+    statusBar()->showMessage(tr("Split view: vertical"), 2000);
+}
+
+void MainWindow::onCloseSplitView()
+{
+    while (m_secondTabWidget->count() > 0) {
+        QWidget* widget = m_secondTabWidget->widget(0);
+        QString label = m_secondTabWidget->tabText(0);
+        m_secondTabWidget->removeTab(0);
+        m_tabWidget->addTab(widget, label);
+    }
+    m_secondTabWidget->hide();
+    m_splitViewActive = false;
+    m_closeSplitViewAction->setEnabled(false);
+    m_moveToOtherViewAction->setEnabled(false);
+    m_cloneToOtherViewAction->setEnabled(false);
+    m_focusOtherViewAction->setEnabled(false);
+    statusBar()->showMessage(tr("Split view closed"), 2000);
+}
+
+void MainWindow::onMoveToOtherView()
+{
+    if (!m_splitViewActive) return;
+    QTabWidget* source = activeTabWidget();
+    QTabWidget* target = (source == m_tabWidget) ? m_secondTabWidget : m_tabWidget;
+    int index = source->currentIndex();
+    if (index < 0) return;
+    QWidget* widget = source->widget(index);
+    QString label = source->tabText(index);
+    source->removeTab(index);
+    target->addTab(widget, label);
+    target->setCurrentWidget(widget);
+}
+
+void MainWindow::onCloneToOtherView()
+{
+    if (!m_splitViewActive) return;
+    EditorWidget* current = currentEditor();
+    if (!current) return;
+    QTabWidget* target = (activeTabWidget() == m_tabWidget) ? m_secondTabWidget : m_tabWidget;
+    EditorWidget* clone = createEditor();
+    clone->setText(current->getText());
+    clone->setFilePath(current->getFilePath());
+    clone->setLanguage(current->getLanguage());
+    clone->setEncoding(current->getEncoding());
+    QTabWidget* source = activeTabWidget();
+    QString label = current->getFilePath().isEmpty()
+        ? source->tabText(source->currentIndex())
+        : QFileInfo(current->getFilePath()).fileName();
+    target->addTab(clone, label);
+    target->setCurrentWidget(clone);
+}
+
+void MainWindow::onFocusOtherView()
+{
+    if (!m_splitViewActive) return;
+    if (activeTabWidget() == m_tabWidget && m_secondTabWidget->count() > 0) {
+        EditorWidget* editor = qobject_cast<EditorWidget*>(m_secondTabWidget->currentWidget());
+        if (editor) editor->scintilla()->setFocus();
+    } else if (m_tabWidget->count() > 0) {
+        EditorWidget* editor = qobject_cast<EditorWidget*>(m_tabWidget->currentWidget());
+        if (editor) editor->scintilla()->setFocus();
+    }
+}
+
+void MainWindow::onSecondViewTabChanged(int index)
+{
+    Q_UNUSED(index);
+    updateStatusBar();
+}
+
+void MainWindow::onSecondViewTabCloseRequested(int index)
+{
+    if (index < 0 || index >= m_secondTabWidget->count()) return;
+    EditorWidget* editor = qobject_cast<EditorWidget*>(m_secondTabWidget->widget(index));
+    if (editor && editor->isModified()) {
+        int result = QMessageBox::question(this, tr("Save Changes"),
+            tr("Save changes before closing?"),
+            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+        if (result == QMessageBox::Cancel) return;
+        if (result == QMessageBox::Save) editor->saveFile();
+    }
+    m_secondTabWidget->removeTab(index);
+    if (m_secondTabWidget->count() == 0 && m_splitViewActive) {
+        onCloseSplitView();
+    }
 }
 
 } // namespace NotepadPlusPlus
