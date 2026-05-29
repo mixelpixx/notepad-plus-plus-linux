@@ -11,6 +11,7 @@ class QToolBar;
 class QStatusBar;
 class QMenu;
 class QAction;
+class QLabel;
 QT_END_NAMESPACE
 
 namespace NotepadPlusPlus {
@@ -66,13 +67,14 @@ private slots:
     void onCloseAllFiles();
     void onExit();
     
-    // Edit menu actions  
+    // Edit menu actions
     void onUndo();
     void onRedo();
     void onCut();
     void onCopy();
     void onPaste();
     void onSelectAll();
+    void onToggleMultiEdit();
     void onFind();
     void onReplace();
     void onFindInFiles();
@@ -213,6 +215,7 @@ private:
     QAction* m_replaceAction;
     QAction* m_findInFilesAction;
     QAction* m_goToLineAction;
+    QAction* m_multiEditAction;
     
     QAction* m_wordWrapAction;
     QAction* m_lineNumbersAction;
@@ -269,6 +272,12 @@ private:
     // State
     bool m_readOnlyMode;
     int m_untitledCounter;
+
+    // Status bar widgets
+    QLabel* m_statusPositionLabel;
+    QLabel* m_statusEncodingLabel;
+    QLabel* m_statusLengthLabel;
+    QLabel* m_statusFileSizeLabel;
 };
 
 } // namespace NotepadPlusPlus

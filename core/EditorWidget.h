@@ -105,6 +105,10 @@ public:
     void stopMacroRecording();
     QsciScintilla* scintilla() { return m_editor; }  // Access to internal editor for advanced usage
 
+    // Multi-cursor
+    void setMultiEditEnabled(bool enabled);
+    bool isMultiEditEnabled() const;
+
 signals:
     void modificationChanged(bool modified);
     void cursorPositionChanged(int line, int column);
@@ -134,6 +138,8 @@ private:
     bool m_lastCaseSensitive;
     bool m_lastWholeWord;
     bool m_lastRegex;
+
+    bool m_multiEditEnabled;
 };
 
 } // namespace NotepadPlusPlus
