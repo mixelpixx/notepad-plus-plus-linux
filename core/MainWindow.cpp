@@ -330,6 +330,71 @@ void MainWindow::createActions()
     // Help actions
     m_aboutAction = new QAction(tr("&About Notepad++ Linux"), this);
     m_aboutAction->setStatusTip(tr("Show information about the application"));
+
+    // Line operation actions
+    m_sortLinesAscAction = new QAction(tr("Sort Lines &Ascending"), this);
+    m_sortLinesAscAction->setStatusTip(tr("Sort lines in ascending order"));
+
+    m_sortLinesDescAction = new QAction(tr("Sort Lines &Descending"), this);
+    m_sortLinesDescAction->setStatusTip(tr("Sort lines in descending order"));
+
+    m_sortLinesAsIntAction = new QAction(tr("Sort Lines as &Integers"), this);
+    m_sortLinesAsIntAction->setStatusTip(tr("Sort lines as numeric integers"));
+
+    m_sortLinesCaseInsensitiveAction = new QAction(tr("Sort Lines &Case Insensitive"), this);
+    m_sortLinesCaseInsensitiveAction->setStatusTip(tr("Sort lines ignoring case"));
+
+    m_removeDuplicateLinesAction = new QAction(tr("Remove &Duplicate Lines"), this);
+    m_removeDuplicateLinesAction->setStatusTip(tr("Remove duplicate lines"));
+
+    m_removeConsecutiveDuplicatesAction = new QAction(tr("Remove &Consecutive Duplicates"), this);
+    m_removeConsecutiveDuplicatesAction->setStatusTip(tr("Remove consecutive duplicate lines"));
+
+    m_removeBlankLinesAction = new QAction(tr("Remove &Blank Lines"), this);
+    m_removeBlankLinesAction->setStatusTip(tr("Remove all blank lines"));
+
+    m_joinLinesAction = new QAction(tr("&Join Lines"), this);
+    m_joinLinesAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_J));
+    m_joinLinesAction->setStatusTip(tr("Join selected lines"));
+
+    m_splitLinesAction = new QAction(tr("Sp&lit Lines"), this);
+    m_splitLinesAction->setStatusTip(tr("Split line at cursor position"));
+
+    m_moveLineUpAction = new QAction(tr("Move Line &Up"), this);
+    m_moveLineUpAction->setShortcut(QKeySequence(Qt::ALT | Qt::Key_Up));
+    m_moveLineUpAction->setStatusTip(tr("Move current line up"));
+
+    m_moveLineDownAction = new QAction(tr("Move Line Do&wn"), this);
+    m_moveLineDownAction->setShortcut(QKeySequence(Qt::ALT | Qt::Key_Down));
+    m_moveLineDownAction->setStatusTip(tr("Move current line down"));
+
+    m_duplicateLineAction = new QAction(tr("D&uplicate Line"), this);
+    m_duplicateLineAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_D));
+    m_duplicateLineAction->setStatusTip(tr("Duplicate current line"));
+
+    m_reverseLineOrderAction = new QAction(tr("&Reverse Line Order"), this);
+    m_reverseLineOrderAction->setStatusTip(tr("Reverse the order of lines"));
+
+    // Case conversion actions
+    m_upperCaseAction = new QAction(tr("&UPPERCASE"), this);
+    m_upperCaseAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_U));
+    m_upperCaseAction->setStatusTip(tr("Convert selection to uppercase"));
+
+    m_lowerCaseAction = new QAction(tr("&lowercase"), this);
+    m_lowerCaseAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_U));
+    m_lowerCaseAction->setStatusTip(tr("Convert selection to lowercase"));
+
+    m_titleCaseAction = new QAction(tr("&Title Case"), this);
+    m_titleCaseAction->setStatusTip(tr("Convert selection to title case"));
+
+    m_sentenceCaseAction = new QAction(tr("&Sentence case"), this);
+    m_sentenceCaseAction->setStatusTip(tr("Convert selection to sentence case"));
+
+    m_invertCaseAction = new QAction(tr("&iNVERT cASE"), this);
+    m_invertCaseAction->setStatusTip(tr("Invert the case of selection"));
+
+    m_randomCaseAction = new QAction(tr("&rAnDOm CasE"), this);
+    m_randomCaseAction->setStatusTip(tr("Randomize the case of selection"));
 }
 
 void MainWindow::createMenus()
@@ -366,6 +431,36 @@ void MainWindow::createMenus()
     m_editMenu->addAction(m_selectAllAction);
     m_editMenu->addSeparator();
     m_editMenu->addAction(m_multiEditAction);
+    m_editMenu->addSeparator();
+
+    QMenu* lineOpsMenu = m_editMenu->addMenu(tr("Line Ope&rations"));
+    lineOpsMenu->addAction(m_sortLinesAscAction);
+    lineOpsMenu->addAction(m_sortLinesDescAction);
+    lineOpsMenu->addAction(m_sortLinesAsIntAction);
+    lineOpsMenu->addAction(m_sortLinesCaseInsensitiveAction);
+    lineOpsMenu->addSeparator();
+    lineOpsMenu->addAction(m_removeDuplicateLinesAction);
+    lineOpsMenu->addAction(m_removeConsecutiveDuplicatesAction);
+    lineOpsMenu->addAction(m_removeBlankLinesAction);
+    lineOpsMenu->addSeparator();
+    lineOpsMenu->addAction(m_joinLinesAction);
+    lineOpsMenu->addAction(m_splitLinesAction);
+    lineOpsMenu->addSeparator();
+    lineOpsMenu->addAction(m_moveLineUpAction);
+    lineOpsMenu->addAction(m_moveLineDownAction);
+    lineOpsMenu->addAction(m_duplicateLineAction);
+    lineOpsMenu->addSeparator();
+    lineOpsMenu->addAction(m_reverseLineOrderAction);
+
+    QMenu* caseMenu = m_editMenu->addMenu(tr("&Case Conversion"));
+    caseMenu->addAction(m_upperCaseAction);
+    caseMenu->addAction(m_lowerCaseAction);
+    caseMenu->addSeparator();
+    caseMenu->addAction(m_titleCaseAction);
+    caseMenu->addAction(m_sentenceCaseAction);
+    caseMenu->addSeparator();
+    caseMenu->addAction(m_invertCaseAction);
+    caseMenu->addAction(m_randomCaseAction);
 
     // Search menu
     m_searchMenu = menuBar()->addMenu(tr("&Search"));
@@ -620,6 +715,29 @@ void MainWindow::connectSignals()
     connect(m_goToLineAction, &QAction::triggered, this, &MainWindow::onGoToLine);
     connect(m_multiEditAction, &QAction::triggered, this, &MainWindow::onToggleMultiEdit);
     connect(m_smartHighlightAction, &QAction::triggered, this, &MainWindow::onToggleSmartHighlight);
+
+    // Line operations
+    connect(m_sortLinesAscAction, &QAction::triggered, this, &MainWindow::onSortLinesAsc);
+    connect(m_sortLinesDescAction, &QAction::triggered, this, &MainWindow::onSortLinesDesc);
+    connect(m_sortLinesAsIntAction, &QAction::triggered, this, &MainWindow::onSortLinesAsInt);
+    connect(m_sortLinesCaseInsensitiveAction, &QAction::triggered, this, &MainWindow::onSortLinesCaseInsensitive);
+    connect(m_removeDuplicateLinesAction, &QAction::triggered, this, &MainWindow::onRemoveDuplicateLines);
+    connect(m_removeConsecutiveDuplicatesAction, &QAction::triggered, this, &MainWindow::onRemoveConsecutiveDuplicates);
+    connect(m_removeBlankLinesAction, &QAction::triggered, this, &MainWindow::onRemoveBlankLines);
+    connect(m_joinLinesAction, &QAction::triggered, this, &MainWindow::onJoinLines);
+    connect(m_splitLinesAction, &QAction::triggered, this, &MainWindow::onSplitLines);
+    connect(m_moveLineUpAction, &QAction::triggered, this, &MainWindow::onMoveLineUp);
+    connect(m_moveLineDownAction, &QAction::triggered, this, &MainWindow::onMoveLineDown);
+    connect(m_duplicateLineAction, &QAction::triggered, this, &MainWindow::onDuplicateLine);
+    connect(m_reverseLineOrderAction, &QAction::triggered, this, &MainWindow::onReverseLineOrder);
+
+    // Case conversion
+    connect(m_upperCaseAction, &QAction::triggered, this, &MainWindow::onUpperCase);
+    connect(m_lowerCaseAction, &QAction::triggered, this, &MainWindow::onLowerCase);
+    connect(m_titleCaseAction, &QAction::triggered, this, &MainWindow::onTitleCase);
+    connect(m_sentenceCaseAction, &QAction::triggered, this, &MainWindow::onSentenceCase);
+    connect(m_invertCaseAction, &QAction::triggered, this, &MainWindow::onInvertCase);
+    connect(m_randomCaseAction, &QAction::triggered, this, &MainWindow::onRandomCase);
 
     // View actions
     connect(m_wordWrapAction, &QAction::triggered, this, &MainWindow::onToggleWordWrap);

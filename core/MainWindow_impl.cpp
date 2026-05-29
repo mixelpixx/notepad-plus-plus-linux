@@ -20,6 +20,9 @@
 #include <QCryptographicHash>
 #include <QRegularExpression>
 #include <QStatusBar>
+#include <algorithm>
+#include <random>
+#include <QSet>
 
 namespace NotepadPlusPlus {
 
@@ -1292,6 +1295,516 @@ void MainWindow::onToggleSmartHighlight()
         EditorWidget* editor = getEditor(i);
         if (editor) editor->setSmartHighlightEnabled(enabled);
     }
+}
+
+// Line Operations
+void MainWindow::onSortLinesAsc()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QString text;
+    bool hasSelection = editor->hasSelection();
+
+    if (hasSelection) {
+        text = editor->getSelectedText();
+    } else {
+        text = editor->getText();
+    }
+
+    QStringList lines = text.split('\n');
+    std::sort(lines.begin(), lines.end());
+    QString result = lines.join('\n');
+
+    if (hasSelection) {
+        editor->scintilla()->removeSelectedText();
+        editor->scintilla()->insert(result);
+    } else {
+        editor->setText(result);
+    }
+
+    statusBar()->showMessage(tr("Lines sorted in ascending order"), 2000);
+}
+
+void MainWindow::onSortLinesDesc()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QString text;
+    bool hasSelection = editor->hasSelection();
+
+    if (hasSelection) {
+        text = editor->getSelectedText();
+    } else {
+        text = editor->getText();
+    }
+
+    QStringList lines = text.split('\n');
+    std::sort(lines.begin(), lines.end(), std::greater<QString>());
+    QString result = lines.join('\n');
+
+    if (hasSelection) {
+        editor->scintilla()->removeSelectedText();
+        editor->scintilla()->insert(result);
+    } else {
+        editor->setText(result);
+    }
+
+    statusBar()->showMessage(tr("Lines sorted in descending order"), 2000);
+}
+
+void MainWindow::onSortLinesAsInt()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QString text;
+    bool hasSelection = editor->hasSelection();
+
+    if (hasSelection) {
+        text = editor->getSelectedText();
+    } else {
+        text = editor->getText();
+    }
+
+    QStringList lines = text.split('\n');
+    std::sort(lines.begin(), lines.end(), [](const QString& a, const QString& b) {
+        return a.toInt() < b.toInt();
+    });
+    QString result = lines.join('\n');
+
+    if (hasSelection) {
+        editor->scintilla()->removeSelectedText();
+        editor->scintilla()->insert(result);
+    } else {
+        editor->setText(result);
+    }
+
+    statusBar()->showMessage(tr("Lines sorted as integers"), 2000);
+}
+
+void MainWindow::onSortLinesCaseInsensitive()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QString text;
+    bool hasSelection = editor->hasSelection();
+
+    if (hasSelection) {
+        text = editor->getSelectedText();
+    } else {
+        text = editor->getText();
+    }
+
+    QStringList lines = text.split('\n');
+    std::sort(lines.begin(), lines.end(), [](const QString& a, const QString& b) {
+        return a.toLower() < b.toLower();
+    });
+    QString result = lines.join('\n');
+
+    if (hasSelection) {
+        editor->scintilla()->removeSelectedText();
+        editor->scintilla()->insert(result);
+    } else {
+        editor->setText(result);
+    }
+
+    statusBar()->showMessage(tr("Lines sorted (case insensitive)"), 2000);
+}
+
+void MainWindow::onRemoveDuplicateLines()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QString text;
+    bool hasSelection = editor->hasSelection();
+
+    if (hasSelection) {
+        text = editor->getSelectedText();
+    } else {
+        text = editor->getText();
+    }
+
+    QStringList lines = text.split('\n');
+    QSet<QString> seen;
+    QStringList uniqueLines;
+
+    for (const QString& line : lines) {
+        if (!seen.contains(line)) {
+            seen.insert(line);
+            uniqueLines.append(line);
+        }
+    }
+
+    QString result = uniqueLines.join('\n');
+
+    if (hasSelection) {
+        editor->scintilla()->removeSelectedText();
+        editor->scintilla()->insert(result);
+    } else {
+        editor->setText(result);
+    }
+
+    int removed = lines.size() - uniqueLines.size();
+    statusBar()->showMessage(tr("Removed %1 duplicate lines").arg(removed), 2000);
+}
+
+void MainWindow::onRemoveConsecutiveDuplicates()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QString text;
+    bool hasSelection = editor->hasSelection();
+
+    if (hasSelection) {
+        text = editor->getSelectedText();
+    } else {
+        text = editor->getText();
+    }
+
+    QStringList lines = text.split('\n');
+    QStringList uniqueLines;
+    QString previousLine;
+
+    for (const QString& line : lines) {
+        if (line != previousLine) {
+            uniqueLines.append(line);
+            previousLine = line;
+        }
+    }
+
+    QString result = uniqueLines.join('\n');
+
+    if (hasSelection) {
+        editor->scintilla()->removeSelectedText();
+        editor->scintilla()->insert(result);
+    } else {
+        editor->setText(result);
+    }
+
+    int removed = lines.size() - uniqueLines.size();
+    statusBar()->showMessage(tr("Removed %1 consecutive duplicate lines").arg(removed), 2000);
+}
+
+void MainWindow::onRemoveBlankLines()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QString text;
+    bool hasSelection = editor->hasSelection();
+
+    if (hasSelection) {
+        text = editor->getSelectedText();
+    } else {
+        text = editor->getText();
+    }
+
+    QStringList lines = text.split('\n');
+    QStringList nonBlankLines;
+
+    for (const QString& line : lines) {
+        if (!line.trimmed().isEmpty()) {
+            nonBlankLines.append(line);
+        }
+    }
+
+    QString result = nonBlankLines.join('\n');
+
+    if (hasSelection) {
+        editor->scintilla()->removeSelectedText();
+        editor->scintilla()->insert(result);
+    } else {
+        editor->setText(result);
+    }
+
+    int removed = lines.size() - nonBlankLines.size();
+    statusBar()->showMessage(tr("Removed %1 blank lines").arg(removed), 2000);
+}
+
+void MainWindow::onJoinLines()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    if (!editor->hasSelection()) {
+        statusBar()->showMessage(tr("Please select lines to join"), 2000);
+        return;
+    }
+
+    QString text = editor->getSelectedText();
+    QString result = text;
+    result.replace('\n', ' ');
+
+    editor->scintilla()->removeSelectedText();
+    editor->scintilla()->insert(result);
+
+    statusBar()->showMessage(tr("Lines joined"), 2000);
+}
+
+void MainWindow::onSplitLines()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    int line, column;
+    editor->scintilla()->getCursorPosition(&line, &column);
+
+    // Insert newline at current position
+    editor->scintilla()->insert("\n");
+
+    statusBar()->showMessage(tr("Line split at cursor"), 2000);
+}
+
+void MainWindow::onMoveLineUp()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    int line, column;
+    editor->scintilla()->getCursorPosition(&line, &column);
+
+    if (line == 0) {
+        statusBar()->showMessage(tr("Already at first line"), 2000);
+        return;
+    }
+
+    // Use SCI_LINETRANSPOSE to swap current line with previous
+    editor->scintilla()->SendScintilla(QsciScintilla::SCI_LINETRANSPOSE);
+
+    // Move cursor up to follow the line
+    editor->scintilla()->setCursorPosition(line - 1, column);
+
+    statusBar()->showMessage(tr("Line moved up"), 2000);
+}
+
+void MainWindow::onMoveLineDown()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    int line, column;
+    editor->scintilla()->getCursorPosition(&line, &column);
+
+    int totalLines = editor->scintilla()->lines();
+    if (line >= totalLines - 1) {
+        statusBar()->showMessage(tr("Already at last line"), 2000);
+        return;
+    }
+
+    // Move to next line first
+    editor->scintilla()->setCursorPosition(line + 1, column);
+
+    // Use SCI_LINETRANSPOSE to swap with previous (which is the original line)
+    editor->scintilla()->SendScintilla(QsciScintilla::SCI_LINETRANSPOSE);
+
+    statusBar()->showMessage(tr("Line moved down"), 2000);
+}
+
+void MainWindow::onDuplicateLine()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    // Use SCI_LINEDUPLICATE
+    editor->scintilla()->SendScintilla(QsciScintilla::SCI_LINEDUPLICATE);
+
+    statusBar()->showMessage(tr("Line duplicated"), 2000);
+}
+
+void MainWindow::onReverseLineOrder()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QString text;
+    bool hasSelection = editor->hasSelection();
+
+    if (hasSelection) {
+        text = editor->getSelectedText();
+    } else {
+        text = editor->getText();
+    }
+
+    QStringList lines = text.split('\n');
+    std::reverse(lines.begin(), lines.end());
+    QString result = lines.join('\n');
+
+    if (hasSelection) {
+        editor->scintilla()->removeSelectedText();
+        editor->scintilla()->insert(result);
+    } else {
+        editor->setText(result);
+    }
+
+    statusBar()->showMessage(tr("Line order reversed"), 2000);
+}
+
+// Case Conversion
+void MainWindow::onUpperCase()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    if (!editor->hasSelection()) {
+        statusBar()->showMessage(tr("Please select text to convert"), 2000);
+        return;
+    }
+
+    QString text = editor->getSelectedText();
+    QString result = text.toUpper();
+
+    editor->scintilla()->removeSelectedText();
+    editor->scintilla()->insert(result);
+
+    statusBar()->showMessage(tr("Converted to UPPERCASE"), 2000);
+}
+
+void MainWindow::onLowerCase()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    if (!editor->hasSelection()) {
+        statusBar()->showMessage(tr("Please select text to convert"), 2000);
+        return;
+    }
+
+    QString text = editor->getSelectedText();
+    QString result = text.toLower();
+
+    editor->scintilla()->removeSelectedText();
+    editor->scintilla()->insert(result);
+
+    statusBar()->showMessage(tr("Converted to lowercase"), 2000);
+}
+
+void MainWindow::onTitleCase()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    if (!editor->hasSelection()) {
+        statusBar()->showMessage(tr("Please select text to convert"), 2000);
+        return;
+    }
+
+    QString text = editor->getSelectedText();
+    QString result = text.toLower();
+
+    // Capitalize after spaces, hyphens, and underscores
+    bool capitalizeNext = true;
+    for (int i = 0; i < result.length(); ++i) {
+        if (capitalizeNext && result[i].isLetter()) {
+            result[i] = result[i].toUpper();
+            capitalizeNext = false;
+        } else if (result[i].isSpace() || result[i] == '-' || result[i] == '_') {
+            capitalizeNext = true;
+        }
+    }
+
+    editor->scintilla()->removeSelectedText();
+    editor->scintilla()->insert(result);
+
+    statusBar()->showMessage(tr("Converted to Title Case"), 2000);
+}
+
+void MainWindow::onSentenceCase()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    if (!editor->hasSelection()) {
+        statusBar()->showMessage(tr("Please select text to convert"), 2000);
+        return;
+    }
+
+    QString text = editor->getSelectedText();
+    QString result = text.toLower();
+
+    // Capitalize after sentence endings (. ! ?)
+    bool capitalizeNext = true;
+    for (int i = 0; i < result.length(); ++i) {
+        if (capitalizeNext && result[i].isLetter()) {
+            result[i] = result[i].toUpper();
+            capitalizeNext = false;
+        } else if (result[i] == '.' || result[i] == '!' || result[i] == '?') {
+            capitalizeNext = true;
+        }
+    }
+
+    editor->scintilla()->removeSelectedText();
+    editor->scintilla()->insert(result);
+
+    statusBar()->showMessage(tr("Converted to Sentence case"), 2000);
+}
+
+void MainWindow::onInvertCase()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    if (!editor->hasSelection()) {
+        statusBar()->showMessage(tr("Please select text to convert"), 2000);
+        return;
+    }
+
+    QString text = editor->getSelectedText();
+    QString result;
+
+    for (const QChar& ch : text) {
+        if (ch.isUpper()) {
+            result += ch.toLower();
+        } else if (ch.isLower()) {
+            result += ch.toUpper();
+        } else {
+            result += ch;
+        }
+    }
+
+    editor->scintilla()->removeSelectedText();
+    editor->scintilla()->insert(result);
+
+    statusBar()->showMessage(tr("Case inverted"), 2000);
+}
+
+void MainWindow::onRandomCase()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    if (!editor->hasSelection()) {
+        statusBar()->showMessage(tr("Please select text to convert"), 2000);
+        return;
+    }
+
+    QString text = editor->getSelectedText();
+    QString result;
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, 1);
+
+    for (const QChar& ch : text) {
+        if (ch.isLetter()) {
+            if (dis(gen) == 0) {
+                result += ch.toLower();
+            } else {
+                result += ch.toUpper();
+            }
+        } else {
+            result += ch;
+        }
+    }
+
+    editor->scintilla()->removeSelectedText();
+    editor->scintilla()->insert(result);
+
+    statusBar()->showMessage(tr("Converted to rAnDOm CasE"), 2000);
 }
 
 } // namespace NotepadPlusPlus
