@@ -21,6 +21,7 @@ class FindReplaceDialog;
 class FindInFilesDialog;
 class DocumentMapPanel;
 class PreferencesDialog;
+class IncrementalSearchBar;
 
 class MainWindow : public QMainWindow
 {
@@ -80,6 +81,7 @@ private slots:
     void onReplace();
     void onFindInFiles();
     void onGoToLine();
+    void onToggleIncrementalSearch();
 
     // Line operations
     void onSortLinesAsc();
@@ -208,6 +210,7 @@ private:
     std::unique_ptr<FindInFilesDialog> m_findInFilesDialog;
     std::unique_ptr<PreferencesDialog> m_preferencesDialog;
     DocumentMapPanel* m_documentMapPanel;
+    IncrementalSearchBar* m_incrementalSearchBar;
     
     // Menus
     QMenu* m_fileMenu;
@@ -251,6 +254,7 @@ private:
     QAction* m_findInFilesAction;
     QAction* m_goToLineAction;
     QAction* m_multiEditAction;
+    QAction* m_incrementalSearchAction;
 
     QAction* m_smartHighlightAction;
 

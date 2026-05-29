@@ -5,6 +5,7 @@
 #include "../ui/FindInFilesDialog.h"
 #include "../ui/DocumentMapPanel.h"
 #include "../ui/PreferencesDialog.h"
+#include "../ui/IncrementalSearchBar.h"
 #include "../utils/ConfigManager.h"
 #include <QFileDialog>
 #include <QMessageBox>
@@ -325,12 +326,22 @@ void MainWindow::onGoToLine()
 {
     EditorWidget* editor = currentEditor();
     if (!editor) return;
-    
+
     bool ok;
     int line = QInputDialog::getInt(this, tr("Go to Line"),
                                     tr("Line number:"), 1, 1, 999999, 1, &ok);
     if (ok) {
         editor->gotoLine(line);
+    }
+}
+
+void MainWindow::onToggleIncrementalSearch()
+{
+    if (m_incrementalSearchAction->isChecked()) {
+        m_incrementalSearchBar->setEditor(currentEditor());
+        m_incrementalSearchBar->activate();
+    } else {
+        m_incrementalSearchBar->deactivate();
     }
 }
 
@@ -393,6 +404,11 @@ void MainWindow::onTabChanged(int index)
     // Update document map with current editor
     if (m_documentMapPanel->isVisible()) {
         m_documentMapPanel->setEditor(editor);
+    }
+
+    // Update incremental search bar with current editor
+    if (m_incrementalSearchBar->isVisible()) {
+        m_incrementalSearchBar->setEditor(editor);
     }
 }
 

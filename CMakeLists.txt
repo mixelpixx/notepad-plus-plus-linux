@@ -54,6 +54,7 @@ set(SOURCES
     ui/DocumentMapWidget.cpp
     ui/DocumentMapPanel.cpp
     ui/PreferencesDialog.cpp
+    ui/IncrementalSearchBar.cpp
 )
 
 # Header files (for MOC)
@@ -72,6 +73,7 @@ set(HEADERS
     ui/DocumentMapWidget.h
     ui/DocumentMapPanel.h
     ui/PreferencesDialog.h
+    ui/IncrementalSearchBar.h
 )
 
 # Create executable
