@@ -113,6 +113,14 @@ public:
     void setSmartHighlightEnabled(bool enabled);
     bool isSmartHighlightEnabled() const;
 
+    // Bookmarks
+    void toggleBookmark(int line = -1);
+    void nextBookmark();
+    void previousBookmark();
+    void clearAllBookmarks();
+    bool hasBookmark(int line) const;
+    QList<int> getBookmarkedLines() const;
+
 signals:
     void modificationChanged(bool modified);
     void cursorPositionChanged(int line, int column);
@@ -149,6 +157,9 @@ private:
     bool m_smartHighlightEnabled;
     void updateSmartHighlight();
     void clearSmartHighlight();
+
+    static const int BOOKMARK_MARKER = 0;
+    static const int BOOKMARK_MARGIN = 1;
 };
 
 } // namespace NotepadPlusPlus

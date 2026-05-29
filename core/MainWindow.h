@@ -103,7 +103,18 @@ private slots:
     void onSentenceCase();
     void onInvertCase();
     void onRandomCase();
-    
+
+    // Bookmark actions
+    void onToggleBookmark();
+    void onNextBookmark();
+    void onPreviousBookmark();
+    void onClearAllBookmarks();
+    void onCutBookmarkedLines();
+    void onCopyBookmarkedLines();
+    void onDeleteBookmarkedLines();
+    void onPasteToReplaceBookmarkedLines();
+    void onInverseBookmarks();
+
     // View menu actions
     void onToggleWordWrap();
     void onToggleLineNumbers();
@@ -265,7 +276,18 @@ private:
     QAction* m_sentenceCaseAction;
     QAction* m_invertCaseAction;
     QAction* m_randomCaseAction;
-    
+
+    // Bookmark actions
+    QAction* m_toggleBookmarkAction;
+    QAction* m_nextBookmarkAction;
+    QAction* m_previousBookmarkAction;
+    QAction* m_clearAllBookmarksAction;
+    QAction* m_cutBookmarkedLinesAction;
+    QAction* m_copyBookmarkedLinesAction;
+    QAction* m_deleteBookmarkedLinesAction;
+    QAction* m_pasteToReplaceBookmarkedLinesAction;
+    QAction* m_inverseBookmarksAction;
+
     QAction* m_wordWrapAction;
     QAction* m_lineNumbersAction;
     QAction* m_documentMapAction;
