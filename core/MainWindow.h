@@ -80,6 +80,29 @@ private slots:
     void onReplace();
     void onFindInFiles();
     void onGoToLine();
+
+    // Line operations
+    void onSortLinesAsc();
+    void onSortLinesDesc();
+    void onSortLinesAsInt();
+    void onSortLinesCaseInsensitive();
+    void onRemoveDuplicateLines();
+    void onRemoveConsecutiveDuplicates();
+    void onRemoveBlankLines();
+    void onJoinLines();
+    void onSplitLines();
+    void onMoveLineUp();
+    void onMoveLineDown();
+    void onDuplicateLine();
+    void onReverseLineOrder();
+
+    // Case conversion
+    void onUpperCase();
+    void onLowerCase();
+    void onTitleCase();
+    void onSentenceCase();
+    void onInvertCase();
+    void onRandomCase();
     
     // View menu actions
     void onToggleWordWrap();
@@ -219,6 +242,29 @@ private:
     QAction* m_multiEditAction;
 
     QAction* m_smartHighlightAction;
+
+    // Line operation actions
+    QAction* m_sortLinesAscAction;
+    QAction* m_sortLinesDescAction;
+    QAction* m_sortLinesAsIntAction;
+    QAction* m_sortLinesCaseInsensitiveAction;
+    QAction* m_removeDuplicateLinesAction;
+    QAction* m_removeConsecutiveDuplicatesAction;
+    QAction* m_removeBlankLinesAction;
+    QAction* m_joinLinesAction;
+    QAction* m_splitLinesAction;
+    QAction* m_moveLineUpAction;
+    QAction* m_moveLineDownAction;
+    QAction* m_duplicateLineAction;
+    QAction* m_reverseLineOrderAction;
+
+    // Case conversion actions
+    QAction* m_upperCaseAction;
+    QAction* m_lowerCaseAction;
+    QAction* m_titleCaseAction;
+    QAction* m_sentenceCaseAction;
+    QAction* m_invertCaseAction;
+    QAction* m_randomCaseAction;
     
     QAction* m_wordWrapAction;
     QAction* m_lineNumbersAction;
