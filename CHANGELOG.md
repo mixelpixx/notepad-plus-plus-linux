@@ -2,61 +2,42 @@
 
 All notable changes to Notepad++ Linux will be documented in this file.
 
+## [1.1.0] - 2026-05-29
+
+### Added
+- Split view editing with horizontal and vertical split, move/clone between views, F8 to switch focus
+- Incremental search bar (Ctrl+Alt+I) with live match highlighting, match count, and keyboard navigation
+- Bookmark system with margin markers, Ctrl+F2 toggle, F2/Shift+F2 navigation, cut/copy/delete/paste bookmarked lines
+- Line operations: sort ascending/descending/as integers/case-insensitive, remove duplicates, remove consecutive duplicates, remove blank lines, join lines, split lines, move line up/down, duplicate line, reverse line order
+- Case conversion: UPPERCASE, lowercase, Title Case, Sentence case, iNVERT cAsE, random case
+- Smart highlighting of all occurrences of selected word
+- Multi-cursor editing with Ctrl+Click to add cursors, typing at all positions simultaneously
+- Application icon embedded from project logo
+
+### Changed
+- Central widget restructured from QTabWidget to QSplitter for split view support
+- Status bar now shows live cursor position, selection length, file size, and encoding
+- About dialog updated with project logo
+- Version updated to 1.1.0
+
 ## [1.0.0] - 2024-11-09
 
 ### Added
 - Complete text editor functionality with Qt6/QScintilla
 - Multi-tab interface with session management
-- Syntax highlighting for 13+ programming languages
+- Syntax highlighting for 13 programming languages
 - Advanced find and replace with regex support
 - Find in Files with threaded search engine
 - Document map (minimap) for navigation
 - Comprehensive preferences dialog with 10 categories
 - Encoding support (UTF-8, UTF-16, ANSI)
-- Tools menu with text transformation utilities
-- Macro recording and playback framework
+- Tools menu with text transformation utilities (Base64, URL encode/decode, MD5, SHA256)
+- Macro recording, playback, save/load with keyboard shortcuts
 - Run menu for code execution (Python, JavaScript, C/C++)
+- Backup and auto-save system
+- Settings import/export
+- Column/block selection with Alt+Drag
 - Window management with tab navigation
 - Theme support (Light, Dark, Monokai)
-- Professional menu system with keyboard shortcuts
-
-### Technical Features
-- Qt6 and Qt5 compatibility
-- CMake build system
-- Platform abstraction layer
-- Configuration management system
-- Dockable panel architecture
-- Plugin system framework
-
-### Supported Languages
-- C/C++
-- Python
-- JavaScript
-- Java
-- HTML
-- CSS
-- XML
-- SQL
-- Bash
-- JSON
-- YAML
-- Perl
-- Plain Text
-
-### Developer Tools
+- Line ending conversion (CRLF, LF, CR)
 - Word count and text analysis
-- Base64 encoding/decoding
-- URL encoding/decoding
-- MD5 and SHA256 hash generation
-- Line ending conversion
-- Code compilation and execution
-
-## [Unreleased]
-
-### Planned
-- Function list panel
-- File browser panel
-- Split view editing
-- Enhanced plugin system
-- Additional language lexers
-- Performance optimizations

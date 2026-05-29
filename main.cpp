@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QCommandLineParser>
+#include <QIcon>
 #include <QDebug>
 #include "core/Application.h"
 
@@ -10,7 +11,8 @@ int main(int argc, char *argv[])
     // Set application metadata
     QCoreApplication::setOrganizationName("Notepad++");
     QCoreApplication::setApplicationName("Notepad++ Linux");
-    QCoreApplication::setApplicationVersion("8.7.0-linux-alpha");
+    QCoreApplication::setApplicationVersion("1.1.0");
+    app.setWindowIcon(QIcon(":/images/notepad++linux3_600.png"));
     
     // Command line parser
     QCommandLineParser parser;
