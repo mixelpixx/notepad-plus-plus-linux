@@ -13,6 +13,7 @@
 #include <QCloseEvent>
 #include <QSettings>
 #include <QMenu>
+#include <QLabel>
 #include <QUrl>
 #include <QDesktopServices>
 #include <QProcess>
@@ -919,14 +920,25 @@ void MainWindow::closeEvent(QCloseEvent *event)
 EditorWidget* MainWindow::createEditor()
 {
     EditorWidget* editor = new EditorWidget(this);
-    
+
     connect(editor, &EditorWidget::modificationChanged,
             this, &MainWindow::onEditorModified);
-    
+
+    connect(editor, &EditorWidget::cursorPositionChanged,
+            this, [this](int, int) {
+        updateStatusBar();
+    });
+
+    connect(editor, &EditorWidget::textChanged,
+            this, [this]() {
+        updateStatusBar();
+    });
+
     // Apply current view settings
     editor->setWordWrap(m_wordWrapAction->isChecked());
     editor->setShowLineNumbers(m_lineNumbersAction->isChecked());
-    
+    editor->setMultiEditEnabled(m_multiEditAction->isChecked());
+
     return editor;
 }
 
@@ -980,9 +992,52 @@ void MainWindow::updateWindowTitle()
 void MainWindow::updateStatusBar()
 {
     EditorWidget* editor = currentEditor();
-    if (editor) {
-        // TODO: Update status bar with current editor info
+    if (!editor) {
+        m_statusPositionLabel->setText(tr("Line: 1  Col: 1"));
+        m_statusLengthLabel->setText(tr("Length: 0"));
+        m_statusFileSizeLabel->setText(tr("0 bytes"));
+        m_statusEncodingLabel->setText(tr("UTF-8"));
+        return;
     }
+
+    // Get cursor position
+    int line, column;
+    editor->scintilla()->getCursorPosition(&line, &column);
+    m_statusPositionLabel->setText(tr("Line: %1  Col: %2").arg(line + 1).arg(column + 1));
+
+    // Get selection length
+    QString selectedText = editor->getSelectedText();
+    int selLength = selectedText.length();
+    if (selLength > 0) {
+        m_statusLengthLabel->setText(tr("Sel: %1").arg(selLength));
+    } else {
+        m_statusLengthLabel->setText(tr("Length: %1").arg(editor->getText().length()));
+    }
+
+    // Get file size
+    QString filePath = editor->getFilePath();
+    if (!filePath.isEmpty() && QFile::exists(filePath)) {
+        QFileInfo fileInfo(filePath);
+        qint64 size = fileInfo.size();
+        QString sizeStr;
+        if (size < 1024) {
+            sizeStr = tr("%1 bytes").arg(size);
+        } else if (size < 1024 * 1024) {
+            sizeStr = tr("%1 KB").arg(size / 1024.0, 0, 'f', 1);
+        } else {
+            sizeStr = tr("%1 MB").arg(size / (1024.0 * 1024.0), 0, 'f', 2);
+        }
+        m_statusFileSizeLabel->setText(sizeStr);
+    } else {
+        m_statusFileSizeLabel->setText(tr("Unsaved"));
+    }
+
+    // Get encoding
+    QString encoding = editor->getEncoding();
+    if (encoding.isEmpty()) {
+        encoding = "UTF-8";
+    }
+    m_statusEncodingLabel->setText(encoding);
 }
 
 void MainWindow::updateRecentFilesMenu()
@@ -1217,6 +1272,16 @@ void MainWindow::registerMacroShortcuts()
     }
 
     qDebug() << "Registered" << m_macroShortcutActions.size() << "macro shortcuts";
+}
+
+void MainWindow::onToggleMultiEdit()
+{
+    bool enabled = m_multiEditAction->isChecked();
+    for (int i = 0; i < m_tabWidget->count(); ++i) {
+        EditorWidget* editor = getEditor(i);
+        if (editor) editor->setMultiEditEnabled(enabled);
+    }
+    statusBar()->showMessage(enabled ? tr("Multi-editing enabled") : tr("Multi-editing disabled"), 2000);
 }
 
 } // namespace NotepadPlusPlus

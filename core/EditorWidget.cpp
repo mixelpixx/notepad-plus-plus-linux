@@ -31,6 +31,7 @@ EditorWidget::EditorWidget(QWidget *parent)
     , m_lastCaseSensitive(false)
     , m_lastWholeWord(false)
     , m_lastRegex(false)
+    , m_multiEditEnabled(true)
 {
     setupEditor();
     connectEditorSignals();
@@ -89,7 +90,18 @@ void EditorWidget::setupEditor()
     QFont font("Monospace", 10);
     font.setFixedPitch(true);
     m_editor->setFont(font);
-    
+
+    // Enable rectangular/column selection
+    // SCI_SETVIRTUALSPACEOPTIONS: Enable virtual space for rectangular selection
+    m_editor->SendScintilla(QsciScintilla::SCI_SETVIRTUALSPACEOPTIONS, 1);  // SCVS_RECTANGULARSELECTION
+    // SCI_SETRECTANGULARSELECTIONMODIFIER: Set Alt key as the modifier
+    m_editor->SendScintilla(QsciScintilla::SCI_SETRECTANGULARSELECTIONMODIFIER, 4);  // SCMOD_ALT (Alt key)
+
+    // Multi-cursor/multi-editing support
+    m_editor->SendScintilla(QsciScintilla::SCI_SETMULTIPLESELECTION, 1);
+    m_editor->SendScintilla(QsciScintilla::SCI_SETADDITIONALSELECTIONTYPING, 1);
+    m_editor->SendScintilla(QsciScintilla::SCI_SETMULTIPASTE, 1);  // SC_MULTIPASTE_EACH
+
     // Apply initial theme
     applyTheme();
 }
@@ -564,6 +576,18 @@ void EditorWidget::stopMacroRecording()
     // SCI_STOPRECORD = 3002
     m_editor->SendScintilla(3002);  // SCI_STOPRECORD
     qDebug() << "Macro recording stopped on editor";
+}
+
+void EditorWidget::setMultiEditEnabled(bool enabled)
+{
+    m_multiEditEnabled = enabled;
+    m_editor->SendScintilla(QsciScintilla::SCI_SETMULTIPLESELECTION, enabled ? 1 : 0);
+    m_editor->SendScintilla(QsciScintilla::SCI_SETADDITIONALSELECTIONTYPING, enabled ? 1 : 0);
+}
+
+bool EditorWidget::isMultiEditEnabled() const
+{
+    return m_multiEditEnabled;
 }
 
 } // namespace NotepadPlusPlus

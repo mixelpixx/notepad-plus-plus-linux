@@ -170,7 +170,12 @@ void MainWindow::createActions()
     m_goToLineAction = new QAction(tr("&Go to Line..."), this);
     m_goToLineAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_G));
     m_goToLineAction->setStatusTip(tr("Go to a specific line"));
-    
+
+    m_multiEditAction = new QAction(tr("Multi-&Editing Mode"), this);
+    m_multiEditAction->setCheckable(true);
+    m_multiEditAction->setChecked(true);
+    m_multiEditAction->setStatusTip(tr("Enable Ctrl+Click to add multiple cursors"));
+
     // View actions
     m_wordWrapAction = new QAction(tr("&Word Wrap"), this);
     m_wordWrapAction->setCheckable(true);
@@ -354,7 +359,9 @@ void MainWindow::createMenus()
     m_editMenu->addAction(m_pasteAction);
     m_editMenu->addSeparator();
     m_editMenu->addAction(m_selectAllAction);
-    
+    m_editMenu->addSeparator();
+    m_editMenu->addAction(m_multiEditAction);
+
     // Search menu
     m_searchMenu = menuBar()->addMenu(tr("&Search"));
     m_searchMenu->addAction(m_findAction);
@@ -563,13 +570,23 @@ void MainWindow::createToolBars()
 void MainWindow::createStatusBar()
 {
     statusBar()->showMessage(tr("Ready"));
-    
-    // Add permanent widgets
-    QLabel* positionLabel = new QLabel(tr("Line: 1, Column: 1"));
-    statusBar()->addPermanentWidget(positionLabel);
-    
-    QLabel* encodingLabel = new QLabel(tr("UTF-8"));
-    statusBar()->addPermanentWidget(encodingLabel);
+
+    // Create status bar labels
+    m_statusLengthLabel = new QLabel(tr("Length: 0"));
+    m_statusLengthLabel->setMinimumWidth(100);
+    statusBar()->addPermanentWidget(m_statusLengthLabel);
+
+    m_statusPositionLabel = new QLabel(tr("Line: 1  Col: 1"));
+    m_statusPositionLabel->setMinimumWidth(120);
+    statusBar()->addPermanentWidget(m_statusPositionLabel);
+
+    m_statusFileSizeLabel = new QLabel(tr("0 bytes"));
+    m_statusFileSizeLabel->setMinimumWidth(80);
+    statusBar()->addPermanentWidget(m_statusFileSizeLabel);
+
+    m_statusEncodingLabel = new QLabel(tr("UTF-8"));
+    m_statusEncodingLabel->setMinimumWidth(60);
+    statusBar()->addPermanentWidget(m_statusEncodingLabel);
 }
 
 void MainWindow::connectSignals()
@@ -595,7 +612,8 @@ void MainWindow::connectSignals()
     connect(m_replaceAction, &QAction::triggered, this, &MainWindow::onReplace);
     connect(m_findInFilesAction, &QAction::triggered, this, &MainWindow::onFindInFiles);
     connect(m_goToLineAction, &QAction::triggered, this, &MainWindow::onGoToLine);
-    
+    connect(m_multiEditAction, &QAction::triggered, this, &MainWindow::onToggleMultiEdit);
+
     // View actions
     connect(m_wordWrapAction, &QAction::triggered, this, &MainWindow::onToggleWordWrap);
     connect(m_lineNumbersAction, &QAction::triggered, this, &MainWindow::onToggleLineNumbers);
