@@ -1,5 +1,20 @@
-<RCC>
-    <qresource prefix="/">
-        <file>images/notepad++linux3_600.png</file>
-    </qresource>
+<!DOCTYPE RCC>
+<RCC version="1.0">
+<qresource prefix="/">
+    <file>images/notepad++linux3_600.png</file>
+    <file>icons/document-new.svg</file>
+    <file>icons/document-open.svg</file>
+    <file>icons/document-save.svg</file>
+    <file>icons/document-save-all.svg</file>
+    <file>icons/edit-undo.svg</file>
+    <file>icons/edit-redo.svg</file>
+    <file>icons/edit-cut.svg</file>
+    <file>icons/edit-copy.svg</file>
+    <file>icons/edit-paste.svg</file>
+    <file>icons/edit-find.svg</file>
+    <file>icons/edit-find-replace.svg</file>
+    <file>icons/system-search.svg</file>
+    <file>icons/zoom-in.svg</file>
+    <file>icons/zoom-out.svg</file>
+</qresource>
 </RCC>

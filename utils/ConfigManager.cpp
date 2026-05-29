@@ -209,7 +209,15 @@ void ConfigManager::setTheme(const QString& theme)
 {
     m_settings->setValue("View/Theme", theme);
 }
+QString ConfigManager::getLanguage() const
+{
+    return m_settings->value("General/Language", "System").toString();
+}
 
+void ConfigManager::setLanguage(const QString& language)
+{
+    m_settings->setValue("General/Language", language);
+}
 QVariant ConfigManager::getValue(const QString& section, const QString& key, const QVariant& defaultValue) const
 {
     return m_settings->value(section + "/" + key, defaultValue);

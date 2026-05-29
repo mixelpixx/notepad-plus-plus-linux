@@ -298,7 +298,11 @@ bool MacroStorage::saveDocument(const QDomDocument& doc)
     }
 
     QTextStream stream(&file);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
     stream.setEncoding(QStringConverter::Utf8);
+#else
+    stream.setCodec("UTF-8");
+#endif
     stream << doc.toString(4);  // 4-space indentation for readability
 
     file.close();

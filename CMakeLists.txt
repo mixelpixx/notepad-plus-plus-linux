@@ -19,6 +19,10 @@ endif()
 
 # Find Qt6 (or Qt5 as fallback)
 find_package(Qt6 COMPONENTS Core Widgets Xml QUIET)
+if(Qt6_FOUND)
+    find_package(Qt6Svg QUIET)
+    set(Qt6_FOUND TRUE)
+endif()
 if(NOT Qt6_FOUND)
     find_package(Qt5 5.15 COMPONENTS Core Widgets Xml REQUIRED)
     set(QSCINTILLA_LIB qscintilla2_qt5)
@@ -34,6 +38,18 @@ if(NOT QSCINTILLA_LIBRARY)
     message(FATAL_ERROR "QScintilla library not found. Install libqscintilla2-qt6-dev (or qt5 version)")
 else()
     message(STATUS "Found QScintilla: ${QSCINTILLA_LIBRARY}")
+endif()
+
+# QScintilla headers (global, also needed by AUTOMOC)
+execute_process(COMMAND dpkg-architecture -qDEB_HOST_MULTIARCH
+    OUTPUT_VARIABLE MULTIARCH OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
+if(NOT MULTIARCH)
+    set(MULTIARCH "x86_64-linux-gnu")
+endif()
+if(Qt6_FOUND)
+    include_directories(/usr/include/${MULTIARCH}/qt6)
+else()
+    include_directories(/usr/include/${MULTIARCH}/qt5)
 endif()
 
 # Source files
@@ -76,7 +92,7 @@ set(HEADERS
     ui/IncrementalSearchBar.h
 )
 
-# Qt resource files
+# Qt resource files (AUTORCC handles compilation)
 set(RESOURCES
     resources/resources.qrc
 )
@@ -86,7 +102,16 @@ add_executable(notepadplusplus ${SOURCES} ${HEADERS} ${RESOURCES})
 
 # Link Qt libraries
 if(Qt6_FOUND)
-    target_link_libraries(notepadplusplus Qt6::Core Qt6::Widgets Qt6::Xml ${QSCINTILLA_LIBRARY})
+    if(Qt6Svg_FOUND)
+        target_link_libraries(notepadplusplus Qt6::Core Qt6::Widgets Qt6::Xml Qt6::Svg ${QSCINTILLA_LIBRARY})
+        message(STATUS "Qt6::Svg linked - SVG icons enabled")
+    else()
+        target_link_libraries(notepadplusplus Qt6::Core Qt6::Widgets Qt6::Xml ${QSCINTILLA_LIBRARY})
+        message(STATUS "Qt6::Svg not found - SVG icons may not render")
+    endif()
+    target_include_directories(notepadplusplus PRIVATE
+        /usr/include/${MULTIARCH}/qt6
+    )
 else()
     target_link_libraries(notepadplusplus Qt5::Core Qt5::Widgets Qt5::Xml ${QSCINTILLA_LIBRARY})
 endif()
@@ -126,6 +151,35 @@ install(DIRECTORY docs/
     DESTINATION share/doc/notepadplusplus
     COMPONENT Documentation
 )
+
+# Install translations
+install(FILES 
+    translations/notepadplusplus_de.qm
+    DESTINATION share/notepadplusplus/translations
+    COMPONENT Translations
+    OPTIONAL
+)
+
+# Install desktop file
+install(FILES
+    data/notepadplusplus.desktop
+    DESTINATION share/applications
+    COMPONENT Runtime
+)
+
+# Install hicolor icons (scalable SVG + all pre-generated PNG sizes)
+install(FILES
+    data/icons/hicolor/scalable/apps/notepadplusplus.svg
+    DESTINATION share/icons/hicolor/scalable/apps
+    COMPONENT Runtime
+)
+foreach(size 16 22 24 32 48 64 96 128 256)
+    install(FILES
+        data/icons/hicolor/${size}x${size}/apps/notepadplusplus.png
+        DESTINATION share/icons/hicolor/${size}x${size}/apps
+        COMPONENT Runtime
+    )
+endforeach()
 
 # CPack configuration
 include(CPack)
