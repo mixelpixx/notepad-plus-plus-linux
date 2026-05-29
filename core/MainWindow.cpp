@@ -5,6 +5,7 @@
 #include "../ui/FindInFilesDialog.h"
 #include "../ui/DocumentMapPanel.h"
 #include "../ui/PreferencesDialog.h"
+#include "../ui/IncrementalSearchBar.h"
 #include "../utils/ConfigManager.h"
 #include <QTabWidget>
 #include <QMenuBar>
@@ -74,7 +75,15 @@ void MainWindow::setupUi()
     m_documentMapPanel = new DocumentMapPanel(this);
     addDockWidget(Qt::RightDockWidgetArea, m_documentMapPanel);
     m_documentMapPanel->hide(); // Hidden by default
-    
+
+    // Create incremental search bar
+    m_incrementalSearchBar = new IncrementalSearchBar(this);
+    addToolBar(Qt::BottomToolBarArea, m_incrementalSearchBar);
+    connect(m_incrementalSearchBar, &IncrementalSearchBar::closeRequested, this, [this]() {
+        m_incrementalSearchBar->deactivate();
+        m_incrementalSearchAction->setChecked(false);
+    });
+
     // Connect Find in Files dialog to open files
     connect(m_findInFilesDialog.get(), &FindInFilesDialog::openFileRequested,
             [this](const QString& filePath, int lineNumber) {
@@ -170,6 +179,11 @@ void MainWindow::createActions()
     m_goToLineAction = new QAction(tr("&Go to Line..."), this);
     m_goToLineAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_G));
     m_goToLineAction->setStatusTip(tr("Go to a specific line"));
+
+    m_incrementalSearchAction = new QAction(tr("&Incremental Search"), this);
+    m_incrementalSearchAction->setShortcut(QKeySequence(Qt::CTRL | Qt::ALT | Qt::Key_I));
+    m_incrementalSearchAction->setCheckable(true);
+    m_incrementalSearchAction->setStatusTip(tr("Search as you type"));
 
     m_multiEditAction = new QAction(tr("Multi-&Editing Mode"), this);
     m_multiEditAction->setCheckable(true);
@@ -498,6 +512,7 @@ void MainWindow::createMenus()
     m_searchMenu->addAction(m_findAction);
     m_searchMenu->addAction(m_replaceAction);
     m_searchMenu->addAction(m_findInFilesAction);
+    m_searchMenu->addAction(m_incrementalSearchAction);
     m_searchMenu->addSeparator();
     m_searchMenu->addAction(m_goToLineAction);
     m_searchMenu->addSeparator();
@@ -759,6 +774,7 @@ void MainWindow::connectSignals()
     connect(m_replaceAction, &QAction::triggered, this, &MainWindow::onReplace);
     connect(m_findInFilesAction, &QAction::triggered, this, &MainWindow::onFindInFiles);
     connect(m_goToLineAction, &QAction::triggered, this, &MainWindow::onGoToLine);
+    connect(m_incrementalSearchAction, &QAction::triggered, this, &MainWindow::onToggleIncrementalSearch);
     connect(m_multiEditAction, &QAction::triggered, this, &MainWindow::onToggleMultiEdit);
     connect(m_smartHighlightAction, &QAction::triggered, this, &MainWindow::onToggleSmartHighlight);
 
