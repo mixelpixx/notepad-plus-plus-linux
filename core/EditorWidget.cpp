@@ -32,6 +32,7 @@ EditorWidget::EditorWidget(QWidget *parent)
     , m_lastWholeWord(false)
     , m_lastRegex(false)
     , m_multiEditEnabled(true)
+    , m_smartHighlightEnabled(true)
 {
     setupEditor();
     connectEditorSignals();
@@ -85,6 +86,13 @@ void EditorWidget::setupEditor()
     
     // Code folding
     m_editor->setFolding(QsciScintilla::BoxedTreeFoldStyle);
+
+    // Smart highlight indicator
+    m_editor->indicatorDefine(QsciScintilla::RoundBoxIndicator, SMART_HIGHLIGHT_INDICATOR);
+    m_editor->setIndicatorForegroundColor(QColor("#FFDB58"), SMART_HIGHLIGHT_INDICATOR);
+    m_editor->setIndicatorDrawUnder(true, SMART_HIGHLIGHT_INDICATOR);
+    m_editor->SendScintilla(QsciScintilla::SCI_INDICSETALPHA, SMART_HIGHLIGHT_INDICATOR, 100);
+    m_editor->SendScintilla(QsciScintilla::SCI_INDICSETOUTLINEALPHA, SMART_HIGHLIGHT_INDICATOR, 200);
     
     // Set default font
     QFont font("Monospace", 10);
@@ -117,10 +125,11 @@ void EditorWidget::connectEditorSignals()
             this, SIGNAL(macroRecordEvent(int,unsigned long,long,const char*)));
     connect(m_editor, &QsciScintilla::textChanged,
             this, &EditorWidget::textChanged);
-    connect(m_editor, &QsciScintilla::cursorPositionChanged, 
+    connect(m_editor, &QsciScintilla::cursorPositionChanged,
             [this](int line, int index) {
                 emit cursorPositionChanged(line + 1, index + 1);
             });
+    connect(m_editor, &QsciScintilla::selectionChanged, this, &EditorWidget::updateSmartHighlight);
 }
 
 bool EditorWidget::loadFile(const QString& filePath)
@@ -589,6 +598,58 @@ void EditorWidget::setMultiEditEnabled(bool enabled)
 bool EditorWidget::isMultiEditEnabled() const
 {
     return m_multiEditEnabled;
+}
+
+void EditorWidget::setSmartHighlightEnabled(bool enabled)
+{
+    m_smartHighlightEnabled = enabled;
+    if (!enabled) {
+        clearSmartHighlight();
+    }
+}
+
+bool EditorWidget::isSmartHighlightEnabled() const
+{
+    return m_smartHighlightEnabled;
+}
+
+void EditorWidget::clearSmartHighlight()
+{
+    int docLen = static_cast<int>(m_editor->SendScintilla(QsciScintilla::SCI_GETLENGTH));
+    m_editor->SendScintilla(QsciScintilla::SCI_SETINDICATORCURRENT, SMART_HIGHLIGHT_INDICATOR);
+    m_editor->SendScintilla(QsciScintilla::SCI_INDICATORCLEARRANGE, 0, docLen);
+}
+
+void EditorWidget::updateSmartHighlight()
+{
+    clearSmartHighlight();
+
+    if (!m_smartHighlightEnabled) return;
+
+    QString selected = m_editor->selectedText();
+    if (selected.isEmpty() || selected.length() < 2 || selected.contains('\n')) return;
+
+    if (selected.trimmed() != selected) return;
+
+    QByteArray searchBytes = selected.toUtf8();
+
+    m_editor->SendScintilla(QsciScintilla::SCI_SETINDICATORCURRENT, SMART_HIGHLIGHT_INDICATOR);
+    m_editor->SendScintilla(QsciScintilla::SCI_SETSEARCHFLAGS,
+                            QsciScintilla::SCFIND_WHOLEWORD | QsciScintilla::SCFIND_MATCHCASE);
+
+    int docLen = static_cast<int>(m_editor->SendScintilla(QsciScintilla::SCI_GETLENGTH));
+    int pos = 0;
+
+    while (pos < docLen) {
+        m_editor->SendScintilla(QsciScintilla::SCI_SETTARGETSTART, pos);
+        m_editor->SendScintilla(QsciScintilla::SCI_SETTARGETEND, docLen);
+        int found = static_cast<int>(m_editor->SendScintilla(QsciScintilla::SCI_SEARCHINTARGET,
+                                      searchBytes.length(), searchBytes.constData()));
+        if (found < 0) break;
+
+        m_editor->SendScintilla(QsciScintilla::SCI_INDICATORFILLRANGE, found, searchBytes.length());
+        pos = found + searchBytes.length();
+    }
 }
 
 } // namespace NotepadPlusPlus
