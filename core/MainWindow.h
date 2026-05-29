@@ -12,6 +12,7 @@ class QStatusBar;
 class QMenu;
 class QAction;
 class QLabel;
+class QSplitter;
 QT_END_NAMESPACE
 
 namespace NotepadPlusPlus {
@@ -82,6 +83,16 @@ private slots:
     void onFindInFiles();
     void onGoToLine();
     void onToggleIncrementalSearch();
+
+    // Split view
+    void onSplitHorizontal();
+    void onSplitVertical();
+    void onCloseSplitView();
+    void onMoveToOtherView();
+    void onCloneToOtherView();
+    void onFocusOtherView();
+    void onSecondViewTabChanged(int index);
+    void onSecondViewTabCloseRequested(int index);
 
     // Line operations
     void onSortLinesAsc();
@@ -192,6 +203,8 @@ private:
     EditorWidget* currentEditor() const;
     EditorWidget* getEditor(int index) const;
     int findEditorIndex(const QString& filePath) const;
+    EditorWidget* currentEditorFromSecondView() const;
+    QTabWidget* activeTabWidget() const;
     
     void updateWindowTitle();
     void updateStatusBar();
@@ -205,6 +218,9 @@ private:
     
     // UI Components
     QTabWidget* m_tabWidget;
+    QSplitter* m_splitter;
+    QTabWidget* m_secondTabWidget;
+    bool m_splitViewActive;
     QFileSystemWatcher* m_fileWatcher;
     std::unique_ptr<FindReplaceDialog> m_findReplaceDialog;
     std::unique_ptr<FindInFilesDialog> m_findInFilesDialog;
@@ -257,6 +273,14 @@ private:
     QAction* m_incrementalSearchAction;
 
     QAction* m_smartHighlightAction;
+
+    // Split view actions
+    QAction* m_splitHorizontalAction;
+    QAction* m_splitVerticalAction;
+    QAction* m_closeSplitViewAction;
+    QAction* m_moveToOtherViewAction;
+    QAction* m_cloneToOtherViewAction;
+    QAction* m_focusOtherViewAction;
 
     // Line operation actions
     QAction* m_sortLinesAscAction;

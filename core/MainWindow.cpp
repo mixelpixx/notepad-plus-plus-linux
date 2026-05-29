@@ -20,6 +20,7 @@
 #include <QLabel>
 #include <QActionGroup>
 #include <QDebug>
+#include <QSplitter>
 
 namespace NotepadPlusPlus {
 
@@ -59,13 +60,26 @@ MainWindow::~MainWindow()
 
 void MainWindow::setupUi()
 {
-    m_tabWidget = new QTabWidget(this);
+    // Create splitter for split view
+    m_splitter = new QSplitter(this);
+    m_splitViewActive = false;
+
+    m_tabWidget = new QTabWidget(m_splitter);
     m_tabWidget->setTabsClosable(true);
     m_tabWidget->setMovable(true);
     m_tabWidget->setDocumentMode(true);
-    
-    setCentralWidget(m_tabWidget);
-    
+
+    m_secondTabWidget = new QTabWidget(m_splitter);
+    m_secondTabWidget->setTabsClosable(true);
+    m_secondTabWidget->setMovable(true);
+    m_secondTabWidget->setDocumentMode(true);
+    m_secondTabWidget->hide();
+
+    m_splitter->addWidget(m_tabWidget);
+    m_splitter->addWidget(m_secondTabWidget);
+
+    setCentralWidget(m_splitter);
+
     // Create dialogs and panels
     m_findReplaceDialog = std::make_unique<FindReplaceDialog>(this);
     m_findInFilesDialog = std::make_unique<FindInFilesDialog>(this);
@@ -194,6 +208,30 @@ void MainWindow::createActions()
     m_smartHighlightAction->setCheckable(true);
     m_smartHighlightAction->setChecked(true);
     m_smartHighlightAction->setStatusTip(tr("Highlight all occurrences of selected word"));
+
+    // Split view actions
+    m_splitHorizontalAction = new QAction(tr("Split &Horizontally"), this);
+    m_splitHorizontalAction->setStatusTip(tr("Split editor view horizontally"));
+
+    m_splitVerticalAction = new QAction(tr("Split &Vertically"), this);
+    m_splitVerticalAction->setStatusTip(tr("Split editor view vertically"));
+
+    m_closeSplitViewAction = new QAction(tr("&Close Split View"), this);
+    m_closeSplitViewAction->setStatusTip(tr("Close the second editor view"));
+    m_closeSplitViewAction->setEnabled(false);
+
+    m_moveToOtherViewAction = new QAction(tr("&Move to Other View"), this);
+    m_moveToOtherViewAction->setStatusTip(tr("Move current tab to the other view"));
+    m_moveToOtherViewAction->setEnabled(false);
+
+    m_cloneToOtherViewAction = new QAction(tr("Cl&one to Other View"), this);
+    m_cloneToOtherViewAction->setStatusTip(tr("Clone current document to the other view"));
+    m_cloneToOtherViewAction->setEnabled(false);
+
+    m_focusOtherViewAction = new QAction(tr("&Focus Other View"), this);
+    m_focusOtherViewAction->setShortcut(QKeySequence(Qt::Key_F8));
+    m_focusOtherViewAction->setStatusTip(tr("Switch focus to the other view"));
+    m_focusOtherViewAction->setEnabled(false);
 
     // View actions
     m_wordWrapAction = new QAction(tr("&Word Wrap"), this);
@@ -538,7 +576,15 @@ void MainWindow::createMenus()
     m_viewMenu->addAction(m_documentMapAction);
     m_viewMenu->addAction(m_smartHighlightAction);
     m_viewMenu->addSeparator();
-    
+    m_viewMenu->addAction(m_splitHorizontalAction);
+    m_viewMenu->addAction(m_splitVerticalAction);
+    m_viewMenu->addAction(m_closeSplitViewAction);
+    m_viewMenu->addSeparator();
+    m_viewMenu->addAction(m_moveToOtherViewAction);
+    m_viewMenu->addAction(m_cloneToOtherViewAction);
+    m_viewMenu->addAction(m_focusOtherViewAction);
+    m_viewMenu->addSeparator();
+
     // Theme submenu
     QMenu* themeMenu = m_viewMenu->addMenu(tr("&Theme"));
     QActionGroup* themeGroup = new QActionGroup(this);
@@ -819,7 +865,18 @@ void MainWindow::connectSignals()
     connect(m_zoomInAction, &QAction::triggered, this, &MainWindow::onZoomIn);
     connect(m_zoomOutAction, &QAction::triggered, this, &MainWindow::onZoomOut);
     connect(m_resetZoomAction, &QAction::triggered, this, &MainWindow::onResetZoom);
-    
+
+    // Split view actions
+    connect(m_splitHorizontalAction, &QAction::triggered, this, &MainWindow::onSplitHorizontal);
+    connect(m_splitVerticalAction, &QAction::triggered, this, &MainWindow::onSplitVertical);
+    connect(m_closeSplitViewAction, &QAction::triggered, this, &MainWindow::onCloseSplitView);
+    connect(m_moveToOtherViewAction, &QAction::triggered, this, &MainWindow::onMoveToOtherView);
+    connect(m_cloneToOtherViewAction, &QAction::triggered, this, &MainWindow::onCloneToOtherView);
+    connect(m_focusOtherViewAction, &QAction::triggered, this, &MainWindow::onFocusOtherView);
+
+    connect(m_secondTabWidget, &QTabWidget::currentChanged, this, &MainWindow::onSecondViewTabChanged);
+    connect(m_secondTabWidget, &QTabWidget::tabCloseRequested, this, &MainWindow::onSecondViewTabCloseRequested);
+
     // Encoding actions
     connect(m_encodingUTF8Action, &QAction::triggered, this, &MainWindow::onEncodingUTF8);
     connect(m_encodingUTF16Action, &QAction::triggered, this, &MainWindow::onEncodingUTF16);
@@ -874,6 +931,24 @@ void MainWindow::connectSignals()
     // MacroManager signals
     connect(&MacroManager::instance(), &MacroManager::macroListChanged,
             this, &MainWindow::registerMacroShortcuts);
+}
+
+QTabWidget* MainWindow::activeTabWidget() const
+{
+    EditorWidget* current = currentEditor();
+    if (!current) return m_tabWidget;
+    for (int i = 0; i < m_secondTabWidget->count(); ++i) {
+        if (m_secondTabWidget->widget(i) == current) {
+            return m_secondTabWidget;
+        }
+    }
+    return m_tabWidget;
+}
+
+EditorWidget* MainWindow::currentEditorFromSecondView() const
+{
+    QWidget* widget = m_secondTabWidget->currentWidget();
+    return qobject_cast<EditorWidget*>(widget);
 }
 
 // Rest of implementation continues...
