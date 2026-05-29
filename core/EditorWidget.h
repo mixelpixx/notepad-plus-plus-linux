@@ -109,6 +109,10 @@ public:
     void setMultiEditEnabled(bool enabled);
     bool isMultiEditEnabled() const;
 
+    // Smart highlighting
+    void setSmartHighlightEnabled(bool enabled);
+    bool isSmartHighlightEnabled() const;
+
 signals:
     void modificationChanged(bool modified);
     void cursorPositionChanged(int line, int column);
@@ -140,6 +144,11 @@ private:
     bool m_lastRegex;
 
     bool m_multiEditEnabled;
+
+    static const int SMART_HIGHLIGHT_INDICATOR = 8;
+    bool m_smartHighlightEnabled;
+    void updateSmartHighlight();
+    void clearSmartHighlight();
 };
 
 } // namespace NotepadPlusPlus

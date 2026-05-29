@@ -938,6 +938,7 @@ EditorWidget* MainWindow::createEditor()
     editor->setWordWrap(m_wordWrapAction->isChecked());
     editor->setShowLineNumbers(m_lineNumbersAction->isChecked());
     editor->setMultiEditEnabled(m_multiEditAction->isChecked());
+    editor->setSmartHighlightEnabled(m_smartHighlightAction->isChecked());
 
     return editor;
 }
@@ -1282,6 +1283,15 @@ void MainWindow::onToggleMultiEdit()
         if (editor) editor->setMultiEditEnabled(enabled);
     }
     statusBar()->showMessage(enabled ? tr("Multi-editing enabled") : tr("Multi-editing disabled"), 2000);
+}
+
+void MainWindow::onToggleSmartHighlight()
+{
+    bool enabled = m_smartHighlightAction->isChecked();
+    for (int i = 0; i < m_tabWidget->count(); ++i) {
+        EditorWidget* editor = getEditor(i);
+        if (editor) editor->setSmartHighlightEnabled(enabled);
+    }
 }
 
 } // namespace NotepadPlusPlus

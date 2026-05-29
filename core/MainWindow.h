@@ -75,6 +75,7 @@ private slots:
     void onPaste();
     void onSelectAll();
     void onToggleMultiEdit();
+    void onToggleSmartHighlight();
     void onFind();
     void onReplace();
     void onFindInFiles();
@@ -216,6 +217,8 @@ private:
     QAction* m_findInFilesAction;
     QAction* m_goToLineAction;
     QAction* m_multiEditAction;
+
+    QAction* m_smartHighlightAction;
     
     QAction* m_wordWrapAction;
     QAction* m_lineNumbersAction;

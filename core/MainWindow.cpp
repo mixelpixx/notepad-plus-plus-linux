@@ -176,6 +176,11 @@ void MainWindow::createActions()
     m_multiEditAction->setChecked(true);
     m_multiEditAction->setStatusTip(tr("Enable Ctrl+Click to add multiple cursors"));
 
+    m_smartHighlightAction = new QAction(tr("Smart &Highlighting"), this);
+    m_smartHighlightAction->setCheckable(true);
+    m_smartHighlightAction->setChecked(true);
+    m_smartHighlightAction->setStatusTip(tr("Highlight all occurrences of selected word"));
+
     // View actions
     m_wordWrapAction = new QAction(tr("&Word Wrap"), this);
     m_wordWrapAction->setCheckable(true);
@@ -375,6 +380,7 @@ void MainWindow::createMenus()
     m_viewMenu->addAction(m_wordWrapAction);
     m_viewMenu->addAction(m_lineNumbersAction);
     m_viewMenu->addAction(m_documentMapAction);
+    m_viewMenu->addAction(m_smartHighlightAction);
     m_viewMenu->addSeparator();
     
     // Theme submenu
@@ -613,6 +619,7 @@ void MainWindow::connectSignals()
     connect(m_findInFilesAction, &QAction::triggered, this, &MainWindow::onFindInFiles);
     connect(m_goToLineAction, &QAction::triggered, this, &MainWindow::onGoToLine);
     connect(m_multiEditAction, &QAction::triggered, this, &MainWindow::onToggleMultiEdit);
+    connect(m_smartHighlightAction, &QAction::triggered, this, &MainWindow::onToggleSmartHighlight);
 
     // View actions
     connect(m_wordWrapAction, &QAction::triggered, this, &MainWindow::onToggleWordWrap);
