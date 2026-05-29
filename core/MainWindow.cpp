@@ -395,6 +395,37 @@ void MainWindow::createActions()
 
     m_randomCaseAction = new QAction(tr("&rAnDOm CasE"), this);
     m_randomCaseAction->setStatusTip(tr("Randomize the case of selection"));
+
+    // Bookmark actions
+    m_toggleBookmarkAction = new QAction(tr("Toggle &Bookmark"), this);
+    m_toggleBookmarkAction->setShortcut(QKeySequence(Qt::CTRL | Qt::Key_F2));
+    m_toggleBookmarkAction->setStatusTip(tr("Toggle bookmark on current line"));
+
+    m_nextBookmarkAction = new QAction(tr("&Next Bookmark"), this);
+    m_nextBookmarkAction->setShortcut(QKeySequence(Qt::Key_F2));
+    m_nextBookmarkAction->setStatusTip(tr("Go to next bookmark"));
+
+    m_previousBookmarkAction = new QAction(tr("&Previous Bookmark"), this);
+    m_previousBookmarkAction->setShortcut(QKeySequence(Qt::SHIFT | Qt::Key_F2));
+    m_previousBookmarkAction->setStatusTip(tr("Go to previous bookmark"));
+
+    m_clearAllBookmarksAction = new QAction(tr("&Clear All Bookmarks"), this);
+    m_clearAllBookmarksAction->setStatusTip(tr("Remove all bookmarks"));
+
+    m_cutBookmarkedLinesAction = new QAction(tr("C&ut Bookmarked Lines"), this);
+    m_cutBookmarkedLinesAction->setStatusTip(tr("Cut all bookmarked lines"));
+
+    m_copyBookmarkedLinesAction = new QAction(tr("&Copy Bookmarked Lines"), this);
+    m_copyBookmarkedLinesAction->setStatusTip(tr("Copy all bookmarked lines"));
+
+    m_deleteBookmarkedLinesAction = new QAction(tr("&Delete Bookmarked Lines"), this);
+    m_deleteBookmarkedLinesAction->setStatusTip(tr("Delete all bookmarked lines"));
+
+    m_pasteToReplaceBookmarkedLinesAction = new QAction(tr("&Paste to Replace Bookmarked Lines"), this);
+    m_pasteToReplaceBookmarkedLinesAction->setStatusTip(tr("Replace bookmarked lines with clipboard content"));
+
+    m_inverseBookmarksAction = new QAction(tr("&Inverse Bookmarks"), this);
+    m_inverseBookmarksAction->setStatusTip(tr("Invert bookmark status on all lines"));
 }
 
 void MainWindow::createMenus()
@@ -469,7 +500,22 @@ void MainWindow::createMenus()
     m_searchMenu->addAction(m_findInFilesAction);
     m_searchMenu->addSeparator();
     m_searchMenu->addAction(m_goToLineAction);
-    
+    m_searchMenu->addSeparator();
+
+    // Bookmarks submenu
+    QMenu* bookmarkMenu = m_searchMenu->addMenu(tr("&Bookmarks"));
+    bookmarkMenu->addAction(m_toggleBookmarkAction);
+    bookmarkMenu->addAction(m_nextBookmarkAction);
+    bookmarkMenu->addAction(m_previousBookmarkAction);
+    bookmarkMenu->addAction(m_clearAllBookmarksAction);
+    bookmarkMenu->addSeparator();
+    bookmarkMenu->addAction(m_cutBookmarkedLinesAction);
+    bookmarkMenu->addAction(m_copyBookmarkedLinesAction);
+    bookmarkMenu->addAction(m_deleteBookmarkedLinesAction);
+    bookmarkMenu->addSeparator();
+    bookmarkMenu->addAction(m_pasteToReplaceBookmarkedLinesAction);
+    bookmarkMenu->addAction(m_inverseBookmarksAction);
+
     // View menu
     m_viewMenu = menuBar()->addMenu(tr("&View"));
     m_viewMenu->addAction(m_wordWrapAction);
@@ -738,6 +784,17 @@ void MainWindow::connectSignals()
     connect(m_sentenceCaseAction, &QAction::triggered, this, &MainWindow::onSentenceCase);
     connect(m_invertCaseAction, &QAction::triggered, this, &MainWindow::onInvertCase);
     connect(m_randomCaseAction, &QAction::triggered, this, &MainWindow::onRandomCase);
+
+    // Bookmark actions
+    connect(m_toggleBookmarkAction, &QAction::triggered, this, &MainWindow::onToggleBookmark);
+    connect(m_nextBookmarkAction, &QAction::triggered, this, &MainWindow::onNextBookmark);
+    connect(m_previousBookmarkAction, &QAction::triggered, this, &MainWindow::onPreviousBookmark);
+    connect(m_clearAllBookmarksAction, &QAction::triggered, this, &MainWindow::onClearAllBookmarks);
+    connect(m_cutBookmarkedLinesAction, &QAction::triggered, this, &MainWindow::onCutBookmarkedLines);
+    connect(m_copyBookmarkedLinesAction, &QAction::triggered, this, &MainWindow::onCopyBookmarkedLines);
+    connect(m_deleteBookmarkedLinesAction, &QAction::triggered, this, &MainWindow::onDeleteBookmarkedLines);
+    connect(m_pasteToReplaceBookmarkedLinesAction, &QAction::triggered, this, &MainWindow::onPasteToReplaceBookmarkedLines);
+    connect(m_inverseBookmarksAction, &QAction::triggered, this, &MainWindow::onInverseBookmarks);
 
     // View actions
     connect(m_wordWrapAction, &QAction::triggered, this, &MainWindow::onToggleWordWrap);

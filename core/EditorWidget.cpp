@@ -70,7 +70,16 @@ void EditorWidget::setupEditor()
     m_editor->setMarginLineNumbers(0, true);
     m_editor->setMarginsBackgroundColor(QColor("#f0f0f0"));
     m_editor->setMarginsForegroundColor(QColor("#666666"));
-    
+
+    // Bookmark margin
+    m_editor->setMarginType(1, QsciScintilla::SymbolMargin);
+    m_editor->setMarginWidth(1, 16);
+    m_editor->setMarginSensitivity(1, true);
+    m_editor->setMarginMarkerMask(1, 1 << BOOKMARK_MARKER);
+    m_editor->markerDefine(QsciScintilla::Circle, BOOKMARK_MARKER);
+    m_editor->setMarkerBackgroundColor(QColor("#1E90FF"), BOOKMARK_MARKER);
+    m_editor->setMarkerForegroundColor(QColor("#1E90FF"), BOOKMARK_MARKER);
+
     // Current line highlighting
     m_editor->setCaretLineVisible(true);
     m_editor->setCaretLineBackgroundColor(QColor("#fffacd"));
@@ -130,6 +139,11 @@ void EditorWidget::connectEditorSignals()
                 emit cursorPositionChanged(line + 1, index + 1);
             });
     connect(m_editor, &QsciScintilla::selectionChanged, this, &EditorWidget::updateSmartHighlight);
+    connect(m_editor, &QsciScintilla::marginClicked, this, [this](int margin, int line, Qt::KeyboardModifiers) {
+        if (margin == BOOKMARK_MARGIN) {
+            toggleBookmark(line);
+        }
+    });
 }
 
 bool EditorWidget::loadFile(const QString& filePath)
@@ -650,6 +664,68 @@ void EditorWidget::updateSmartHighlight()
         m_editor->SendScintilla(QsciScintilla::SCI_INDICATORFILLRANGE, found, searchBytes.length());
         pos = found + searchBytes.length();
     }
+}
+
+void EditorWidget::toggleBookmark(int line)
+{
+    if (line < 0) {
+        int col;
+        m_editor->getCursorPosition(&line, &col);
+    }
+    unsigned markers = static_cast<unsigned>(m_editor->markersAtLine(line));
+    if (markers & (1 << BOOKMARK_MARKER)) {
+        m_editor->markerDelete(line, BOOKMARK_MARKER);
+    } else {
+        m_editor->markerAdd(line, BOOKMARK_MARKER);
+    }
+}
+
+void EditorWidget::nextBookmark()
+{
+    int line, col;
+    m_editor->getCursorPosition(&line, &col);
+    int next = m_editor->markerFindNext(line + 1, 1 << BOOKMARK_MARKER);
+    if (next < 0) {
+        next = m_editor->markerFindNext(0, 1 << BOOKMARK_MARKER);
+    }
+    if (next >= 0) {
+        m_editor->setCursorPosition(next, 0);
+    }
+}
+
+void EditorWidget::previousBookmark()
+{
+    int line, col;
+    m_editor->getCursorPosition(&line, &col);
+    int prev = m_editor->markerFindPrevious(line - 1, 1 << BOOKMARK_MARKER);
+    if (prev < 0) {
+        prev = m_editor->markerFindPrevious(m_editor->lines() - 1, 1 << BOOKMARK_MARKER);
+    }
+    if (prev >= 0) {
+        m_editor->setCursorPosition(prev, 0);
+    }
+}
+
+void EditorWidget::clearAllBookmarks()
+{
+    m_editor->markerDeleteAll(BOOKMARK_MARKER);
+}
+
+bool EditorWidget::hasBookmark(int line) const
+{
+    unsigned markers = static_cast<unsigned>(m_editor->markersAtLine(line));
+    return (markers & (1 << BOOKMARK_MARKER)) != 0;
+}
+
+QList<int> EditorWidget::getBookmarkedLines() const
+{
+    QList<int> lines;
+    int line = m_editor->markerFindNext(0, 1 << BOOKMARK_MARKER);
+    while (line >= 0) {
+        lines.append(line);
+        line = m_editor->markerFindNext(line + 1, 1 << BOOKMARK_MARKER);
+    }
+    return lines;
 }
 
 } // namespace NotepadPlusPlus

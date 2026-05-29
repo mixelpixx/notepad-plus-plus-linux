@@ -20,6 +20,8 @@
 #include <QCryptographicHash>
 #include <QRegularExpression>
 #include <QStatusBar>
+#include <QClipboard>
+#include <QApplication>
 #include <algorithm>
 #include <random>
 #include <QSet>
@@ -1805,6 +1807,215 @@ void MainWindow::onRandomCase()
     editor->scintilla()->insert(result);
 
     statusBar()->showMessage(tr("Converted to rAnDOm CasE"), 2000);
+}
+
+// Bookmark operations
+void MainWindow::onToggleBookmark()
+{
+    EditorWidget* editor = currentEditor();
+    if (editor) {
+        editor->toggleBookmark();
+        statusBar()->showMessage(tr("Bookmark toggled"), 2000);
+    }
+}
+
+void MainWindow::onNextBookmark()
+{
+    EditorWidget* editor = currentEditor();
+    if (editor) {
+        editor->nextBookmark();
+    }
+}
+
+void MainWindow::onPreviousBookmark()
+{
+    EditorWidget* editor = currentEditor();
+    if (editor) {
+        editor->previousBookmark();
+    }
+}
+
+void MainWindow::onClearAllBookmarks()
+{
+    EditorWidget* editor = currentEditor();
+    if (editor) {
+        editor->clearAllBookmarks();
+        statusBar()->showMessage(tr("All bookmarks cleared"), 2000);
+    }
+}
+
+void MainWindow::onCutBookmarkedLines()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QList<int> bookmarked = editor->getBookmarkedLines();
+    if (bookmarked.isEmpty()) {
+        statusBar()->showMessage(tr("No bookmarked lines"), 2000);
+        return;
+    }
+
+    QsciScintilla* sci = editor->scintilla();
+
+    // Collect bookmarked line text
+    QStringList lines;
+    for (int line : bookmarked) {
+        QString lineText = sci->text(line);
+        lines.append(lineText);
+    }
+
+    // Copy to clipboard
+    QClipboard* clipboard = QApplication::clipboard();
+    clipboard->setText(lines.join(""));
+
+    // Delete lines in reverse order (bottom to top)
+    sci->SendScintilla(QsciScintilla::SCI_BEGINUNDOACTION);
+    for (int i = bookmarked.size() - 1; i >= 0; --i) {
+        int line = bookmarked[i];
+        int lineStart = static_cast<int>(sci->SendScintilla(QsciScintilla::SCI_POSITIONFROMLINE, line));
+        int nextLineStart = static_cast<int>(sci->SendScintilla(QsciScintilla::SCI_POSITIONFROMLINE, line + 1));
+        int lineEnd;
+        if (nextLineStart > lineStart) {
+            lineEnd = nextLineStart;
+        } else {
+            // Last line - handle specially
+            lineEnd = static_cast<int>(sci->SendScintilla(QsciScintilla::SCI_GETLINEENDPOSITION, line));
+            if (lineStart > 0) {
+                // Delete the newline before this line instead
+                lineStart = static_cast<int>(sci->SendScintilla(QsciScintilla::SCI_GETLINEENDPOSITION, line - 1));
+            }
+        }
+        sci->SendScintilla(QsciScintilla::SCI_DELETERANGE, lineStart, lineEnd - lineStart);
+    }
+    sci->SendScintilla(QsciScintilla::SCI_ENDUNDOACTION);
+
+    statusBar()->showMessage(tr("Cut %1 bookmarked lines").arg(bookmarked.size()), 2000);
+}
+
+void MainWindow::onCopyBookmarkedLines()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QList<int> bookmarked = editor->getBookmarkedLines();
+    if (bookmarked.isEmpty()) {
+        statusBar()->showMessage(tr("No bookmarked lines"), 2000);
+        return;
+    }
+
+    QsciScintilla* sci = editor->scintilla();
+
+    // Collect bookmarked line text
+    QStringList lines;
+    for (int line : bookmarked) {
+        QString lineText = sci->text(line);
+        lines.append(lineText);
+    }
+
+    // Copy to clipboard
+    QClipboard* clipboard = QApplication::clipboard();
+    clipboard->setText(lines.join(""));
+
+    statusBar()->showMessage(tr("Copied %1 bookmarked lines").arg(bookmarked.size()), 2000);
+}
+
+void MainWindow::onDeleteBookmarkedLines()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QList<int> bookmarked = editor->getBookmarkedLines();
+    if (bookmarked.isEmpty()) {
+        statusBar()->showMessage(tr("No bookmarked lines"), 2000);
+        return;
+    }
+
+    QsciScintilla* sci = editor->scintilla();
+
+    // Delete lines in reverse order (bottom to top)
+    sci->SendScintilla(QsciScintilla::SCI_BEGINUNDOACTION);
+    for (int i = bookmarked.size() - 1; i >= 0; --i) {
+        int line = bookmarked[i];
+        int lineStart = static_cast<int>(sci->SendScintilla(QsciScintilla::SCI_POSITIONFROMLINE, line));
+        int nextLineStart = static_cast<int>(sci->SendScintilla(QsciScintilla::SCI_POSITIONFROMLINE, line + 1));
+        int lineEnd;
+        if (nextLineStart > lineStart) {
+            lineEnd = nextLineStart;
+        } else {
+            // Last line - handle specially
+            lineEnd = static_cast<int>(sci->SendScintilla(QsciScintilla::SCI_GETLINEENDPOSITION, line));
+            if (lineStart > 0) {
+                // Delete the newline before this line instead
+                lineStart = static_cast<int>(sci->SendScintilla(QsciScintilla::SCI_GETLINEENDPOSITION, line - 1));
+            }
+        }
+        sci->SendScintilla(QsciScintilla::SCI_DELETERANGE, lineStart, lineEnd - lineStart);
+    }
+    sci->SendScintilla(QsciScintilla::SCI_ENDUNDOACTION);
+
+    statusBar()->showMessage(tr("Deleted %1 bookmarked lines").arg(bookmarked.size()), 2000);
+}
+
+void MainWindow::onPasteToReplaceBookmarkedLines()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QList<int> bookmarked = editor->getBookmarkedLines();
+    if (bookmarked.isEmpty()) {
+        statusBar()->showMessage(tr("No bookmarked lines"), 2000);
+        return;
+    }
+
+    QClipboard* clipboard = QApplication::clipboard();
+    QString clipText = clipboard->text();
+    if (clipText.isEmpty()) {
+        statusBar()->showMessage(tr("Clipboard is empty"), 2000);
+        return;
+    }
+
+    QsciScintilla* sci = editor->scintilla();
+
+    // Replace each bookmarked line with clipboard content
+    sci->SendScintilla(QsciScintilla::SCI_BEGINUNDOACTION);
+    // Process in reverse order to maintain line numbers
+    for (int i = bookmarked.size() - 1; i >= 0; --i) {
+        int line = bookmarked[i];
+        int lineStart = static_cast<int>(sci->SendScintilla(QsciScintilla::SCI_POSITIONFROMLINE, line));
+        int lineEnd = static_cast<int>(sci->SendScintilla(QsciScintilla::SCI_GETLINEENDPOSITION, line));
+
+        sci->SendScintilla(QsciScintilla::SCI_SETTARGETSTART, lineStart);
+        sci->SendScintilla(QsciScintilla::SCI_SETTARGETEND, lineEnd);
+        QByteArray bytes = clipText.toUtf8();
+        sci->SendScintilla(QsciScintilla::SCI_REPLACETARGET, bytes.length(), bytes.constData());
+    }
+    sci->SendScintilla(QsciScintilla::SCI_ENDUNDOACTION);
+
+    statusBar()->showMessage(tr("Replaced %1 bookmarked lines with clipboard").arg(bookmarked.size()), 2000);
+}
+
+void MainWindow::onInverseBookmarks()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QsciScintilla* sci = editor->scintilla();
+    int totalLines = sci->lines();
+
+    // Get currently bookmarked lines
+    QList<int> bookmarked = editor->getBookmarkedLines();
+    QSet<int> bookmarkedSet(bookmarked.begin(), bookmarked.end());
+
+    // Toggle all lines
+    for (int line = 0; line < totalLines; ++line) {
+        if (bookmarkedSet.contains(line)) {
+            sci->markerDelete(line, 0);  // BOOKMARK_MARKER = 0
+        } else {
+            sci->markerAdd(line, 0);  // BOOKMARK_MARKER = 0
+        }
+    }
+
+    statusBar()->showMessage(tr("Bookmarks inverted"), 2000);
 }
 
 } // namespace NotepadPlusPlus
