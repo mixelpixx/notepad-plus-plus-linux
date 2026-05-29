@@ -76,8 +76,13 @@ set(HEADERS
     ui/IncrementalSearchBar.h
 )
 
+# Qt resource files
+set(RESOURCES
+    resources/resources.qrc
+)
+
 # Create executable
-add_executable(notepadplusplus ${SOURCES} ${HEADERS})
+add_executable(notepadplusplus ${SOURCES} ${HEADERS} ${RESOURCES})
 
 # Link Qt libraries
 if(Qt6_FOUND)

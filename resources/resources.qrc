@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>images/notepad++linux3_600.png</file>
+    </qresource>
+</RCC>

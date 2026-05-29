@@ -23,6 +23,7 @@
 #include <QStatusBar>
 #include <QClipboard>
 #include <QApplication>
+#include <QPixmap>
 #include <QSplitter>
 #include <algorithm>
 #include <random>
@@ -920,12 +921,15 @@ void MainWindow::onCascadeWindows()
 
 void MainWindow::onAbout()
 {
-    QMessageBox::about(this, tr("About Notepad++ Linux"),
-        tr("<h3>Notepad++ Linux</h3>"
-           "<p>Version 8.7.0-linux-alpha</p>"
-           "<p>A free source code editor for Linux</p>"
-           "<p>Based on the original Notepad++ by Don Ho</p>"
-           "<p>Linux port - Community Edition</p>"));
+    QMessageBox aboutBox(this);
+    aboutBox.setWindowTitle(tr("About Notepad++ Linux"));
+    aboutBox.setIconPixmap(QPixmap(":/images/notepad++linux3_600.png").scaled(128, 128, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    aboutBox.setText(tr("<h3>Notepad++ Linux</h3>"
+                        "<p>Version 1.1.0</p>"));
+    aboutBox.setInformativeText(tr("A native Linux port of Notepad++, built with Qt and QScintilla.\n\n"
+                                   "Based on the original Notepad++ by Don Ho.\n\n"
+                                   "Licensed under the GNU General Public License v3.0."));
+    aboutBox.exec();
 }
 
 // Protected overrides
