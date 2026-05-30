@@ -9,6 +9,7 @@
 #include "../ui/ClickableLabel.h"
 #include "../ui/FunctionListPanel.h"
 #include "../ui/WorkspacePanel.h"
+#include "../ui/DocumentSwitcher.h"
 #include "../utils/ConfigManager.h"
 #include <QTabWidget>
 #include <QTabBar>
@@ -120,6 +121,8 @@ void MainWindow::setupUi()
     connect(m_workspacePanel, &WorkspacePanel::fileOpenRequested,
             this, &MainWindow::openFile);
 
+    m_documentSwitcher = new DocumentSwitcher(this);
+
     // Create incremental search bar
     m_incrementalSearchBar = new IncrementalSearchBar(this);
     addToolBar(Qt::BottomToolBarArea, m_incrementalSearchBar);
@@ -186,6 +189,13 @@ void MainWindow::createActions()
     m_closeAllAction->setShortcut(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_W));
     m_closeAllAction->setStatusTip(tr("Close all open files"));
     
+    m_printAction = new QAction(QIcon::fromTheme("document-print"), tr("&Print..."), this);
+    m_printAction->setShortcut(QKeySequence::Print);
+    m_printAction->setStatusTip(tr("Print the current document"));
+
+    m_printPreviewAction = new QAction(QIcon::fromTheme("document-print-preview"), tr("Print Pre&view..."), this);
+    m_printPreviewAction->setStatusTip(tr("Preview the document before printing"));
+
     m_exitAction = new QAction(QIcon::fromTheme("application-exit"), tr("E&xit"), this);
     m_exitAction->setShortcut(QKeySequence::Quit);
     m_exitAction->setStatusTip(tr("Exit the application"));
@@ -566,6 +576,9 @@ void MainWindow::createMenus()
     updateRecentFilesMenu();
     
     m_fileMenu->addSeparator();
+    m_fileMenu->addAction(m_printAction);
+    m_fileMenu->addAction(m_printPreviewAction);
+    m_fileMenu->addSeparator();
     m_fileMenu->addAction(m_exitAction);
     
     // Edit menu
@@ -900,6 +913,8 @@ void MainWindow::connectSignals()
     connect(m_saveAllAction, &QAction::triggered, this, &MainWindow::saveAllFiles);
     connect(m_closeAction, &QAction::triggered, this, &MainWindow::onCloseFile);
     connect(m_closeAllAction, &QAction::triggered, this, &MainWindow::onCloseAllFiles);
+    connect(m_printAction, &QAction::triggered, this, &MainWindow::onPrint);
+    connect(m_printPreviewAction, &QAction::triggered, this, &MainWindow::onPrintPreview);
     connect(m_exitAction, &QAction::triggered, this, &MainWindow::onExit);
     
     // Edit actions
