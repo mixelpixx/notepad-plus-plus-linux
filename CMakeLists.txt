@@ -181,26 +181,27 @@ foreach(size 16 22 24 32 48 64 96 128 256)
     )
 endforeach()
 
-# CPack configuration
-include(CPack)
+# CPack configuration (must be set BEFORE include(CPack))
 set(CPACK_PACKAGE_NAME "notepadplusplus")
 set(CPACK_PACKAGE_VENDOR "Notepad++ Linux Project")
-set(CPACK_PACKAGE_VERSION_MAJOR ${PROJECT_VERSION_MAJOR})
-set(CPACK_PACKAGE_VERSION_MINOR ${PROJECT_VERSION_MINOR})
-set(CPACK_PACKAGE_VERSION_PATCH ${PROJECT_VERSION_PATCH})
+set(CPACK_PACKAGE_VERSION_MAJOR 1)
+set(CPACK_PACKAGE_VERSION_MINOR 1)
+set(CPACK_PACKAGE_VERSION_PATCH 0)
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Native Linux port of Notepad++ text editor")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-set(CPACK_PACKAGE_CONTACT "maintainer@example.com")
+set(CPACK_PACKAGE_CONTACT "chris_stockslager@comcast.net")
 
 # DEB package configuration
-set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt6core6, libqt6widgets6, libqscintilla2-qt6-15")
+set(CPACK_DEBIAN_PACKAGE_DEPENDS "libqt6core6t64, libqt6widgets6t64, libqscintilla2-qt6-15")
 set(CPACK_DEBIAN_PACKAGE_SECTION "editors")
 set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
+set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://github.com/mixelpixx/notepad-plus-plus-linux")
 
 # RPM package configuration
 set(CPACK_RPM_PACKAGE_REQUIRES "qt6-qtbase, qscintilla-qt6")
 set(CPACK_RPM_PACKAGE_GROUP "Applications/Editors")
+
+include(CPack)
 
 # Display build information
 message(STATUS "")
