@@ -6,8 +6,10 @@
 #include "../ui/DocumentMapPanel.h"
 #include "../ui/PreferencesDialog.h"
 #include "../ui/IncrementalSearchBar.h"
+#include "../ui/ClickableLabel.h"
 #include "../utils/ConfigManager.h"
 #include <QTabWidget>
+#include <QTabBar>
 #include <QMenuBar>
 #include <QMenu>
 #include <QToolBar>
@@ -76,6 +78,14 @@ void MainWindow::setupUi()
     m_secondTabWidget->setMovable(true);
     m_secondTabWidget->setDocumentMode(true);
     m_secondTabWidget->hide();
+
+    m_tabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_tabWidget->tabBar(), &QTabBar::customContextMenuRequested,
+            this, &MainWindow::onTabContextMenu);
+
+    m_secondTabWidget->tabBar()->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(m_secondTabWidget->tabBar(), &QTabBar::customContextMenuRequested,
+            this, &MainWindow::onSecondViewTabContextMenu);
 
     m_splitter->addWidget(m_tabWidget);
     m_splitter->addWidget(m_secondTabWidget);
@@ -820,22 +830,37 @@ void MainWindow::createStatusBar()
 {
     statusBar()->showMessage(tr("Ready"));
 
-    // Create status bar labels
-    m_statusLengthLabel = new QLabel(tr("Length: 0"));
+    m_statusLengthLabel = new ClickableLabel(tr("Length: 0"));
     m_statusLengthLabel->setMinimumWidth(100);
     statusBar()->addPermanentWidget(m_statusLengthLabel);
 
-    m_statusPositionLabel = new QLabel(tr("Line: 1  Col: 1"));
+    m_statusPositionLabel = new ClickableLabel(tr("Line: 1  Col: 1"));
     m_statusPositionLabel->setMinimumWidth(120);
     statusBar()->addPermanentWidget(m_statusPositionLabel);
+    connect(m_statusPositionLabel, &ClickableLabel::clicked,
+            this, &MainWindow::onStatusPositionClicked);
 
-    m_statusFileSizeLabel = new QLabel(tr("0 bytes"));
-    m_statusFileSizeLabel->setMinimumWidth(80);
-    statusBar()->addPermanentWidget(m_statusFileSizeLabel);
+    m_statusLineEndingLabel = new ClickableLabel(tr("LF"));
+    m_statusLineEndingLabel->setMinimumWidth(50);
+    statusBar()->addPermanentWidget(m_statusLineEndingLabel);
+    connect(m_statusLineEndingLabel, &ClickableLabel::clicked,
+            this, &MainWindow::onStatusLineEndingClicked);
 
-    m_statusEncodingLabel = new QLabel(tr("UTF-8"));
+    m_statusEncodingLabel = new ClickableLabel(tr("UTF-8"));
     m_statusEncodingLabel->setMinimumWidth(60);
     statusBar()->addPermanentWidget(m_statusEncodingLabel);
+    connect(m_statusEncodingLabel, &ClickableLabel::clicked,
+            this, &MainWindow::onStatusEncodingClicked);
+
+    m_statusLanguageLabel = new ClickableLabel(tr("Plain Text"));
+    m_statusLanguageLabel->setMinimumWidth(80);
+    statusBar()->addPermanentWidget(m_statusLanguageLabel);
+    connect(m_statusLanguageLabel, &ClickableLabel::clicked,
+            this, &MainWindow::onStatusLanguageClicked);
+
+    m_statusFileSizeLabel = new ClickableLabel(tr("0 bytes"));
+    m_statusFileSizeLabel->setMinimumWidth(80);
+    statusBar()->addPermanentWidget(m_statusFileSizeLabel);
 }
 
 void MainWindow::connectSignals()

@@ -6,6 +6,7 @@
 #include "../ui/DocumentMapPanel.h"
 #include "../ui/PreferencesDialog.h"
 #include "../ui/IncrementalSearchBar.h"
+#include "../ui/ClickableLabel.h"
 #include "../utils/ConfigManager.h"
 #include <QFileDialog>
 #include <QMessageBox>
@@ -28,6 +29,7 @@
 #include <QDebug>
 #include <QMenuBar>
 #include <QToolBar>
+#include <QTabBar>
 #include <QMimeData>
 #include <QDragEnterEvent>
 #include <QDropEvent>
@@ -1034,6 +1036,8 @@ void MainWindow::updateStatusBar()
         m_statusLengthLabel->setText(tr("Length: 0"));
         m_statusFileSizeLabel->setText(tr("0 bytes"));
         m_statusEncodingLabel->setText(tr("UTF-8"));
+        m_statusLineEndingLabel->setText(tr("LF"));
+        m_statusLanguageLabel->setText(tr("Plain Text"));
         return;
     }
 
@@ -1075,6 +1079,16 @@ void MainWindow::updateStatusBar()
         encoding = "UTF-8";
     }
     m_statusEncodingLabel->setText(encoding);
+
+    // Line ending
+    switch (editor->getLineEnding()) {
+        case EditorWidget::Windows: m_statusLineEndingLabel->setText(tr("CRLF")); break;
+        case EditorWidget::Unix: m_statusLineEndingLabel->setText(tr("LF")); break;
+        case EditorWidget::Mac: m_statusLineEndingLabel->setText(tr("CR")); break;
+    }
+
+    // Language
+    m_statusLanguageLabel->setText(editor->getLanguage());
 }
 
 void MainWindow::updateRecentFilesMenu()
@@ -2267,6 +2281,170 @@ void MainWindow::onToggleFullScreen()
         showFullScreen();
         m_isFullScreen = true;
         m_fullScreenAction->setChecked(true);
+    }
+}
+
+// --- Tab context menu ---
+
+void MainWindow::showTabContextMenu(QTabWidget* tabWidget, const QPoint& pos)
+{
+    m_contextMenuTabIndex = tabWidget->tabBar()->tabAt(pos);
+    m_contextMenuTabWidget = tabWidget;
+    if (m_contextMenuTabIndex < 0) return;
+
+    EditorWidget* editor = qobject_cast<EditorWidget*>(tabWidget->widget(m_contextMenuTabIndex));
+    QMenu menu(this);
+
+    menu.addAction(tr("Close"), [this]() {
+        closeFile(m_contextMenuTabIndex);
+    });
+    menu.addAction(tr("Close Others"), [this]() {
+        for (int i = m_contextMenuTabWidget->count() - 1; i >= 0; --i) {
+            if (i != m_contextMenuTabIndex) closeFile(i);
+            if (i < m_contextMenuTabIndex) m_contextMenuTabIndex--;
+        }
+    });
+    menu.addAction(tr("Close All"), [this]() { closeAllFiles(); });
+    menu.addSeparator();
+
+    if (m_contextMenuTabIndex > 0) {
+        menu.addAction(tr("Close to the Left"), [this]() {
+            for (int i = m_contextMenuTabIndex - 1; i >= 0; --i) {
+                closeFile(i);
+                m_contextMenuTabIndex--;
+            }
+        });
+    }
+    if (m_contextMenuTabIndex < m_contextMenuTabWidget->count() - 1) {
+        menu.addAction(tr("Close to the Right"), [this]() {
+            while (m_contextMenuTabWidget->count() > m_contextMenuTabIndex + 1) {
+                closeFile(m_contextMenuTabIndex + 1);
+            }
+        });
+    }
+
+    if (editor && !editor->getFilePath().isEmpty()) {
+        menu.addSeparator();
+        menu.addAction(tr("Copy Full Path"), [editor]() {
+            QApplication::clipboard()->setText(editor->getFilePath());
+        });
+        menu.addAction(tr("Copy Filename"), [editor]() {
+            QApplication::clipboard()->setText(QFileInfo(editor->getFilePath()).fileName());
+        });
+        menu.addAction(tr("Copy Directory"), [editor]() {
+            QApplication::clipboard()->setText(QFileInfo(editor->getFilePath()).absolutePath());
+        });
+        menu.addSeparator();
+        menu.addAction(tr("Open Containing Folder"), [editor]() {
+            QDesktopServices::openUrl(QUrl::fromLocalFile(QFileInfo(editor->getFilePath()).absolutePath()));
+        });
+        menu.addAction(tr("Rename..."), [this, editor]() {
+            QFileInfo info(editor->getFilePath());
+            bool ok;
+            QString newName = QInputDialog::getText(this, tr("Rename File"),
+                                                   tr("New filename:"), QLineEdit::Normal,
+                                                   info.fileName(), &ok);
+            if (ok && !newName.isEmpty()) {
+                QString newPath = info.absolutePath() + "/" + newName;
+                if (QFile::rename(editor->getFilePath(), newPath)) {
+                    editor->setFilePath(newPath);
+                    m_contextMenuTabWidget->setTabText(m_contextMenuTabIndex, newName);
+                    updateWindowTitle();
+                } else {
+                    QMessageBox::warning(this, tr("Rename Failed"), tr("Could not rename file."));
+                }
+            }
+        });
+    }
+
+    if (m_splitViewActive) {
+        menu.addSeparator();
+        menu.addAction(tr("Move to Other View"), [this]() {
+            onMoveToOtherView();
+        });
+    }
+
+    menu.exec(tabWidget->tabBar()->mapToGlobal(pos));
+}
+
+void MainWindow::onTabContextMenu(const QPoint& pos)
+{
+    showTabContextMenu(m_tabWidget, pos);
+}
+
+void MainWindow::onSecondViewTabContextMenu(const QPoint& pos)
+{
+    showTabContextMenu(m_secondTabWidget, pos);
+}
+
+// --- Status bar clicks ---
+
+void MainWindow::onStatusPositionClicked()
+{
+    onGoToLine();
+}
+
+void MainWindow::onStatusEncodingClicked()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QMenu menu(this);
+    menu.addAction("UTF-8");
+    menu.addAction("UTF-16 LE");
+    menu.addAction("UTF-16 BE");
+    menu.addAction("ANSI / Latin-1");
+
+    QAction* selected = menu.exec(QCursor::pos());
+    if (!selected) return;
+
+    QString text = selected->text();
+    if (text == "UTF-8") editor->setEncoding("UTF-8");
+    else if (text == "UTF-16 LE") editor->setEncoding("UTF-16LE");
+    else if (text == "UTF-16 BE") editor->setEncoding("UTF-16BE");
+    else editor->setEncoding("Latin-1");
+
+    updateStatusBar();
+}
+
+void MainWindow::onStatusLineEndingClicked()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QMenu menu(this);
+    menu.addAction("Windows (CRLF)");
+    menu.addAction("Unix (LF)");
+    menu.addAction("Mac (CR)");
+
+    QAction* selected = menu.exec(QCursor::pos());
+    if (!selected) return;
+
+    QString text = selected->text();
+    if (text.contains("CRLF")) editor->setLineEnding(EditorWidget::Windows);
+    else if (text.contains("LF")) editor->setLineEnding(EditorWidget::Unix);
+    else editor->setLineEnding(EditorWidget::Mac);
+
+    updateStatusBar();
+}
+
+void MainWindow::onStatusLanguageClicked()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QMenu menu(this);
+    QStringList languages = {"Plain Text", "C", "C++", "Java", "JavaScript",
+                            "Python", "Perl", "HTML", "XML", "CSS", "JSON",
+                            "YAML", "SQL", "Bash"};
+    for (const QString& lang : languages) {
+        menu.addAction(lang);
+    }
+
+    QAction* selected = menu.exec(QCursor::pos());
+    if (selected) {
+        editor->setLanguage(selected->text());
+        updateStatusBar();
     }
 }
 
