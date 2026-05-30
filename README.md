@@ -155,16 +155,16 @@ make -j$(nproc)
 ## Project Structure
 
 ```
-core/               Main application logic
+core/                     Main application logic
 
-  Application.cpp   Application controller
-  MainWindow.cpp    Window, menus, actions
-  MainWindow_impl.cpp  Menu action implementations
-  EditorWidget.cpp  QScintilla editor wrapper
-  MacroManager.cpp  Macro recording and playback
-  BackupManager.cpp Auto-save and backup
+  Application.cpp         Application controller
+  MainWindow.cpp          Window, menus, actions
+  MainWindow_impl.cpp     Menu action implementations
+  EditorWidget.cpp        QScintilla editor wrapper
+  MacroManager.cpp        Macro recording and playback
+  BackupManager.cpp       Auto-save and backup
 
-ui/                 UI components
+ui/                       UI components
 
   FindReplaceDialog.cpp
   FindInFilesDialog.cpp
@@ -176,17 +176,17 @@ ui/                 UI components
   ClickableLabel.cpp
   PreferencesDialog.cpp
 
-utils/              Utilities
+utils/                    Utilities
 
-  ConfigManager.cpp Settings persistence
+  ConfigManager.cpp       Settings persistence
 
-platform/           Platform abstraction
+platform/                 Platform abstraction
 
   LinuxPlatform.cpp
 
-resources/          Application resources
+resources/                Application resources
 
-  images/           Logo and icons
+  images/                 Logo and icons
 ```
 
 ## Contributing
