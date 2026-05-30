@@ -23,6 +23,8 @@ class DocumentMapPanel;
 class PreferencesDialog;
 class IncrementalSearchBar;
 class ClickableLabel;
+class FunctionListPanel;
+class WorkspacePanel;
 
 class MainWindow : public QMainWindow
 {
@@ -137,6 +139,8 @@ private slots:
     void onToggleShowIndentGuide();
     void onToggleShowAllChars();
     void onToggleFullScreen();
+    void onToggleFunctionList();
+    void onToggleWorkspace();
     void onZoomIn();
     void onZoomOut();
     void onResetZoom();
@@ -244,6 +248,8 @@ private:
     std::unique_ptr<FindInFilesDialog> m_findInFilesDialog;
     std::unique_ptr<PreferencesDialog> m_preferencesDialog;
     DocumentMapPanel* m_documentMapPanel;
+    FunctionListPanel* m_functionListPanel;
+    WorkspacePanel* m_workspacePanel;
     IncrementalSearchBar* m_incrementalSearchBar;
     
     // Menus
@@ -342,6 +348,8 @@ private:
     QAction* m_showIndentGuideAction;
     QAction* m_showAllCharsAction;
     QAction* m_fullScreenAction;
+    QAction* m_functionListAction;
+    QAction* m_workspaceAction;
     QAction* m_zoomInAction;
     QAction* m_zoomOutAction;
     QAction* m_resetZoomAction;
