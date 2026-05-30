@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(NotepadPlusPlusLinux 
-    VERSION 1.0.0
+    VERSION 1.2.0
     DESCRIPTION "Native Linux port of Notepad++ text editor"
     HOMEPAGE_URL "https://github.com/yourusername/notepad-plus-plus-linux"
     LANGUAGES CXX)
@@ -193,7 +193,7 @@ endforeach()
 set(CPACK_PACKAGE_NAME "notepadplusplus")
 set(CPACK_PACKAGE_VENDOR "Notepad++ Linux Project")
 set(CPACK_PACKAGE_VERSION_MAJOR 1)
-set(CPACK_PACKAGE_VERSION_MINOR 1)
+set(CPACK_PACKAGE_VERSION_MINOR 2)
 set(CPACK_PACKAGE_VERSION_PATCH 0)
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Native Linux port of Notepad++ text editor")
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")

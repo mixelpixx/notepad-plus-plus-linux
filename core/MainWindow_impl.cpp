@@ -945,7 +945,7 @@ void MainWindow::onAbout()
     aboutBox.setWindowTitle(tr("About Notepad++ Linux"));
     aboutBox.setIconPixmap(QPixmap(":/images/notepad++linux3_600.png").scaled(128, 128, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     aboutBox.setText(tr("<h3>Notepad++ Linux</h3>"
-                        "<p>Version 1.1.0</p>"));
+                        "<p>Version 1.2.0</p>"));
     aboutBox.setInformativeText(tr("A native Linux port of Notepad++, built with Qt and QScintilla.\n\n"
                                    "Based on the original Notepad++ by Don Ho.\n\n"
                                    "Licensed under the GNU General Public License v3.0."));
