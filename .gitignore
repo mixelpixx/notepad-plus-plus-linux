@@ -37,4 +37,11 @@ Makefile
 # Package files
 *.deb
 *.rpm
+*.snap
 .history/
+
+# Snapcraft build artifacts
+parts/
+stage/
+prime/
+.craft/
