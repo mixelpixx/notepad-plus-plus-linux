@@ -164,14 +164,17 @@ sudo make install
 ## Project Structure
 
 ```
-core/               Main application logic
-  Application.cpp   Application controller
-  MainWindow.cpp    Window, menus, actions
-  MainWindow_impl.cpp  Menu action implementations
-  EditorWidget.cpp  QScintilla editor wrapper
-  MacroManager.cpp  Macro recording and playback
-  BackupManager.cpp Auto-save and backup
-ui/                 UI components
+core/                     Main application logic
+
+  Application.cpp         Application controller
+  MainWindow.cpp          Window, menus, actions
+  MainWindow_impl.cpp     Menu action implementations
+  EditorWidget.cpp        QScintilla editor wrapper
+  MacroManager.cpp        Macro recording and playback
+  BackupManager.cpp       Auto-save and backup
+
+ui/                       UI components
+
   FindReplaceDialog.cpp
   FindInFilesDialog.cpp
   IncrementalSearchBar.cpp
@@ -181,12 +184,18 @@ ui/                 UI components
   DocumentSwitcher.cpp
   ClickableLabel.cpp
   PreferencesDialog.cpp
-utils/              Utilities
-  ConfigManager.cpp Settings persistence
-platform/           Platform abstraction
+
+utils/                    Utilities
+
+  ConfigManager.cpp       Settings persistence
+
+platform/                 Platform abstraction
+
   LinuxPlatform.cpp
-resources/          Application resources
-  images/           Logo and icons
+
+resources/                Application resources
+
+  images/                 Logo and icons
 ```
 
 ## Contributing
