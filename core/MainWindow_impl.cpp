@@ -1328,11 +1328,8 @@ void MainWindow::registerMacroShortcuts()
         addAction(action);
         m_macroShortcutActions.append(action);
 
-        qDebug() << "Registered shortcut for macro:" << macro.name
-                 << "-" << macro.shortcutString();
     }
 
-    qDebug() << "Registered" << m_macroShortcutActions.size() << "macro shortcuts";
 }
 
 void MainWindow::onToggleMultiEdit()

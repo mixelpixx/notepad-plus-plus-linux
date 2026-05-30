@@ -13,6 +13,8 @@
 
 int main(int argc, char *argv[])
 {
+    qunsetenv("SESSION_MANAGER");
+
     QApplication app(argc, argv);
     
     // Set application metadata
@@ -87,10 +89,8 @@ int main(int argc, char *argv[])
             qDebug() << "Loaded translation:" << userLanguage << "(" << language << ")" << "from ../translations";
         }
         else {
-            qDebug() << "No translation found for:" << userLanguage << "(" << language << ")";
         }
     } else {
-        qDebug() << "Using English (no translation)";
     }
     
     // Command line parser

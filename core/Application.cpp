@@ -249,7 +249,6 @@ void Application::loadPlugins()
     QString pluginDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     pluginDir = QDir(pluginDir).filePath("plugins");
     
-    qDebug() << "Loading plugins from:" << pluginDir;
 }
 
 void Application::reloadPlugins()
@@ -338,7 +337,6 @@ void Application::setupBackup()
         }
     });
 
-    qDebug() << "Backup system initialized";
 }
 
 } // namespace NotepadPlusPlus

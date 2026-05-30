@@ -188,8 +188,7 @@ void BackupManager::startPeriodicBackup()
     int interval = ConfigManager::instance().getBackupInterval();
 
     if (interval > 0 && ConfigManager::instance().isBackupEnabled()) {
-        m_backupTimer->start(interval * 60000); // Convert minutes to milliseconds
-        qDebug() << "Started periodic backup timer with interval:" << interval << "minutes";
+        m_backupTimer->start(interval * 60000);
     }
 }
 
@@ -197,7 +196,6 @@ void BackupManager::stopPeriodicBackup()
 {
     if (m_backupTimer->isActive()) {
         m_backupTimer->stop();
-        qDebug() << "Stopped periodic backup timer";
     }
 }
 

@@ -355,7 +355,6 @@ void MacroManager::onMacroRecord(int message, unsigned long wParam, long lParam,
 void MacroManager::loadMacros()
 {
     m_macros = MacroStorage::loadMacros();
-    qDebug() << "Loaded" << m_macros.size() << "macros into cache";
 }
 
 bool MacroManager::isRecordableMessage(unsigned int message) const

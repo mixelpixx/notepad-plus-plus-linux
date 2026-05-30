@@ -125,6 +125,7 @@ void MainWindow::setupUi()
 
     // Create incremental search bar
     m_incrementalSearchBar = new IncrementalSearchBar(this);
+    m_incrementalSearchBar->setObjectName(QStringLiteral("IncrementalSearchBar"));
     addToolBar(Qt::BottomToolBarArea, m_incrementalSearchBar);
     connect(m_incrementalSearchBar, &IncrementalSearchBar::closeRequested, this, [this]() {
         m_incrementalSearchBar->deactivate();

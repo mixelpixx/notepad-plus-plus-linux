@@ -61,7 +61,6 @@ QVector<Macro> MacroStorage::loadMacros()
         macroElement = macroElement.nextSiblingElement("Macro");
     }
 
-    qDebug() << "Loaded" << macros.size() << "macros from" << macroFilePath();
     return macros;
 }
 
@@ -255,8 +254,7 @@ QDomDocument MacroStorage::loadDocument()
     QFile file(filePath);
 
     if (!file.exists()) {
-        qDebug() << "Macro file does not exist:" << filePath;
-        return QDomDocument();  // Return empty document
+        return QDomDocument();
     }
 
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {

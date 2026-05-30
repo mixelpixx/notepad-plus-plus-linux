@@ -1,0 +1,106 @@
+name: notepadplusplus
+base: core24
+version: '1.2.0'
+summary: Native Linux port of Notepad++ text editor
+description: |
+  Notepad++ Linux brings the core features of Notepad++ to Linux without
+  Wine or compatibility layers. Built with Qt6 and QScintilla.
+
+  Features include multi-tab editing, multi-cursor, auto-close brackets,
+  split view, function list panel, folder-as-workspace, find and replace
+  with regex, incremental search, bookmarks, macros, syntax highlighting
+  for 14 languages, print support, document map, and more.
+
+title: Notepad++ Linux
+license: GPL-3.0
+contact: https://github.com/mixelpixx/notepad-plus-plus-linux/issues
+issues: https://github.com/mixelpixx/notepad-plus-plus-linux/issues
+source-code: https://github.com/mixelpixx/notepad-plus-plus-linux
+website: https://github.com/mixelpixx/notepad-plus-plus-linux
+icon: resources/images/notepad++linux3_600.png
+
+grade: stable
+confinement: strict
+
+platforms:
+  amd64:
+    build-on: [amd64]
+    build-for: [amd64]
+
+layout:
+  /usr/share/X11/xkb:
+    bind: $SNAP/usr/share/X11/xkb
+
+apps:
+  notepadplusplus:
+    command: usr/local/bin/notepadplusplus
+    desktop: usr/local/share/applications/notepadplusplus.desktop
+    environment:
+      QT_QPA_PLATFORM: xcb
+      QT_PLUGIN_PATH: $SNAP/usr/lib/x86_64-linux-gnu/qt6/plugins
+      QT_QPA_PLATFORM_PLUGIN_PATH: $SNAP/usr/lib/x86_64-linux-gnu/qt6/plugins/platforms
+      LD_LIBRARY_PATH: $SNAP/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+      XDG_DATA_DIRS: $SNAP/usr/share:$XDG_DATA_DIRS
+      FONTCONFIG_PATH: $SNAP/etc/fonts
+      FONTCONFIG_FILE: $SNAP/etc/fonts/fonts.conf
+    plugs:
+      - home
+      - desktop
+      - desktop-legacy
+      - wayland
+      - x11
+      - opengl
+      - removable-media
+      - cups
+      - unity7
+
+parts:
+  notepadplusplus:
+    plugin: cmake
+    source: .
+    cmake-parameters:
+      - -DCMAKE_INSTALL_PREFIX=/usr/local
+      - -DCMAKE_BUILD_TYPE=Release
+    build-packages:
+      - build-essential
+      - qt6-base-dev
+      - qt6-base-dev-tools
+      - libqt6svg6-dev
+      - libqscintilla2-qt6-dev
+      - libgl-dev
+      - qt6-l10n-tools
+    stage-packages:
+      - libqt6core6t64
+      - libqt6gui6t64
+      - libqt6widgets6t64
+      - libqt6xml6t64
+      - libqt6svg6
+      - libqt6printsupport6t64
+      - libqt6dbus6t64
+      - libqscintilla2-qt6-15
+      - qt6-qpa-plugins
+      - libxkbcommon0
+      - libxkbcommon-x11-0
+      - xkb-data
+      - libxcb-xkb1
+      - libxcb-render0
+      - libxcb-render-util0
+      - libxcb-shape0
+      - libxcb-xfixes0
+      - libxcb-icccm4
+      - libxcb-image0
+      - libxcb-keysyms1
+      - libxcb-randr0
+      - libxcb-cursor0
+      - libgl1-mesa-dri
+      - libegl-mesa0
+      - fontconfig
+    after: [desktop-file]
+
+  desktop-file:
+    plugin: dump
+    source: data
+    organize:
+      notepadplusplus.desktop: usr/local/share/applications/notepadplusplus.desktop
+    stage:
+      - usr/local/share/applications/notepadplusplus.desktop
