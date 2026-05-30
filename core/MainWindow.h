@@ -132,6 +132,11 @@ private slots:
     void onToggleWordWrap();
     void onToggleLineNumbers();
     void onToggleDocumentMap();
+    void onToggleShowWhitespace();
+    void onToggleShowEol();
+    void onToggleShowIndentGuide();
+    void onToggleShowAllChars();
+    void onToggleFullScreen();
     void onZoomIn();
     void onZoomOut();
     void onResetZoom();
@@ -190,6 +195,8 @@ private slots:
     
 protected:
     void closeEvent(QCloseEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
     
 private:
     void setupUi();
@@ -319,6 +326,11 @@ private:
     QAction* m_wordWrapAction;
     QAction* m_lineNumbersAction;
     QAction* m_documentMapAction;
+    QAction* m_showWhitespaceAction;
+    QAction* m_showEolAction;
+    QAction* m_showIndentGuideAction;
+    QAction* m_showAllCharsAction;
+    QAction* m_fullScreenAction;
     QAction* m_zoomInAction;
     QAction* m_zoomOutAction;
     QAction* m_resetZoomAction;
@@ -371,6 +383,7 @@ private:
     // State
     bool m_readOnlyMode;
     int m_untitledCounter;
+    bool m_isFullScreen;
 
     // Status bar widgets
     QLabel* m_statusPositionLabel;

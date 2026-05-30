@@ -105,6 +105,10 @@ public:
     void stopMacroRecording();
     QsciScintilla* scintilla() { return m_editor; }  // Access to internal editor for advanced usage
 
+    // Auto-close brackets
+    void setAutoCloseBracketsEnabled(bool enabled);
+    bool isAutoCloseBracketsEnabled() const;
+
     // Multi-cursor
     void setMultiEditEnabled(bool enabled);
     bool isMultiEditEnabled() const;
@@ -129,9 +133,13 @@ signals:
     void fileSaved(const QString& filePath);
     void macroRecordEvent(int message, unsigned long wParam, long lParam, const char* text);
 
+protected:
+    bool eventFilter(QObject* obj, QEvent* event) override;
+
 private:
     void setupEditor();
     void connectEditorSignals();
+    char getMatchingClose(char ch) const;
     void updateLineNumbers();
     void applyTheme();
     void setupLexer();
@@ -151,6 +159,7 @@ private:
     bool m_lastWholeWord;
     bool m_lastRegex;
 
+    bool m_autoCloseBracketsEnabled;
     bool m_multiEditEnabled;
 
     static const int SMART_HIGHLIGHT_INDICATOR = 8;

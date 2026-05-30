@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
     , m_fileWatcher(nullptr)
     , m_readOnlyMode(false)
     , m_untitledCounter(1)
+    , m_isFullScreen(false)
 {
     setupUi();
     createActions();
@@ -80,6 +81,7 @@ void MainWindow::setupUi()
     m_splitter->addWidget(m_secondTabWidget);
 
     setCentralWidget(m_splitter);
+    setAcceptDrops(true);
 
     // Create dialogs and panels
     m_findReplaceDialog = std::make_unique<FindReplaceDialog>(this);
@@ -254,7 +256,28 @@ void MainWindow::createActions()
     m_documentMapAction = new QAction(tr("Document &Map"), this);
     m_documentMapAction->setCheckable(true);
     m_documentMapAction->setStatusTip(tr("Toggle document map panel"));
-    
+
+    m_showWhitespaceAction = new QAction(tr("Show &Whitespace"), this);
+    m_showWhitespaceAction->setCheckable(true);
+    m_showWhitespaceAction->setStatusTip(tr("Toggle whitespace visibility"));
+
+    m_showEolAction = new QAction(tr("Show &End of Line"), this);
+    m_showEolAction->setCheckable(true);
+    m_showEolAction->setStatusTip(tr("Toggle end-of-line character visibility"));
+
+    m_showIndentGuideAction = new QAction(tr("Show Indent &Guide"), this);
+    m_showIndentGuideAction->setCheckable(true);
+    m_showIndentGuideAction->setStatusTip(tr("Toggle indent guide lines"));
+
+    m_showAllCharsAction = new QAction(tr("Show &All Characters"), this);
+    m_showAllCharsAction->setCheckable(true);
+    m_showAllCharsAction->setStatusTip(tr("Toggle all non-printing characters"));
+
+    m_fullScreenAction = new QAction(tr("&Full Screen"), this);
+    m_fullScreenAction->setShortcut(Qt::Key_F11);
+    m_fullScreenAction->setCheckable(true);
+    m_fullScreenAction->setStatusTip(tr("Toggle full screen mode"));
+
     m_zoomInAction = new QAction(appIcon("zoom-in"), tr("Zoom &In"), this);
     m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
     m_zoomInAction->setStatusTip(tr("Increase text size"));
@@ -584,6 +607,11 @@ void MainWindow::createMenus()
     m_viewMenu->addAction(m_documentMapAction);
     m_viewMenu->addAction(m_smartHighlightAction);
     m_viewMenu->addSeparator();
+    m_viewMenu->addAction(m_showWhitespaceAction);
+    m_viewMenu->addAction(m_showEolAction);
+    m_viewMenu->addAction(m_showIndentGuideAction);
+    m_viewMenu->addAction(m_showAllCharsAction);
+    m_viewMenu->addSeparator();
     m_viewMenu->addAction(m_splitHorizontalAction);
     m_viewMenu->addAction(m_splitVerticalAction);
     m_viewMenu->addAction(m_closeSplitViewAction);
@@ -618,6 +646,8 @@ void MainWindow::createMenus()
         applyTheme(theme);
     });
     
+    m_viewMenu->addSeparator();
+    m_viewMenu->addAction(m_fullScreenAction);
     m_viewMenu->addSeparator();
     m_viewMenu->addAction(m_zoomInAction);
     m_viewMenu->addAction(m_zoomOutAction);
@@ -873,6 +903,11 @@ void MainWindow::connectSignals()
     connect(m_wordWrapAction, &QAction::triggered, this, &MainWindow::onToggleWordWrap);
     connect(m_lineNumbersAction, &QAction::triggered, this, &MainWindow::onToggleLineNumbers);
     connect(m_documentMapAction, &QAction::triggered, this, &MainWindow::onToggleDocumentMap);
+    connect(m_showWhitespaceAction, &QAction::triggered, this, &MainWindow::onToggleShowWhitespace);
+    connect(m_showEolAction, &QAction::triggered, this, &MainWindow::onToggleShowEol);
+    connect(m_showIndentGuideAction, &QAction::triggered, this, &MainWindow::onToggleShowIndentGuide);
+    connect(m_showAllCharsAction, &QAction::triggered, this, &MainWindow::onToggleShowAllChars);
+    connect(m_fullScreenAction, &QAction::triggered, this, &MainWindow::onToggleFullScreen);
     connect(m_zoomInAction, &QAction::triggered, this, &MainWindow::onZoomIn);
     connect(m_zoomOutAction, &QAction::triggered, this, &MainWindow::onZoomOut);
     connect(m_resetZoomAction, &QAction::triggered, this, &MainWindow::onResetZoom);
