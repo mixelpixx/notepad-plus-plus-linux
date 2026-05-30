@@ -11,7 +11,6 @@ class QToolBar;
 class QStatusBar;
 class QMenu;
 class QAction;
-class QLabel;
 class QSplitter;
 QT_END_NAMESPACE
 
@@ -23,6 +22,7 @@ class FindInFilesDialog;
 class DocumentMapPanel;
 class PreferencesDialog;
 class IncrementalSearchBar;
+class ClickableLabel;
 
 class MainWindow : public QMainWindow
 {
@@ -145,6 +145,16 @@ private slots:
     void onTabChanged(int index);
     void onTabCloseRequested(int index);
     void onEditorModified(bool modified);
+
+    // Tab context menu
+    void onTabContextMenu(const QPoint& pos);
+    void onSecondViewTabContextMenu(const QPoint& pos);
+
+    // Status bar clicks
+    void onStatusEncodingClicked();
+    void onStatusLineEndingClicked();
+    void onStatusLanguageClicked();
+    void onStatusPositionClicked();
     
     // Encoding menu actions
     void onEncodingUTF8();
@@ -213,6 +223,7 @@ private:
     EditorWidget* currentEditorFromSecondView() const;
     QTabWidget* activeTabWidget() const;
     
+    void showTabContextMenu(QTabWidget* tabWidget, const QPoint& pos);
     void updateWindowTitle();
     void updateStatusBar();
     void updateRecentFilesMenu();
@@ -385,11 +396,17 @@ private:
     int m_untitledCounter;
     bool m_isFullScreen;
 
+    // Tab context menu state
+    int m_contextMenuTabIndex;
+    QTabWidget* m_contextMenuTabWidget;
+
     // Status bar widgets
-    QLabel* m_statusPositionLabel;
-    QLabel* m_statusEncodingLabel;
-    QLabel* m_statusLengthLabel;
-    QLabel* m_statusFileSizeLabel;
+    ClickableLabel* m_statusPositionLabel;
+    ClickableLabel* m_statusEncodingLabel;
+    ClickableLabel* m_statusLengthLabel;
+    ClickableLabel* m_statusFileSizeLabel;
+    ClickableLabel* m_statusLineEndingLabel;
+    ClickableLabel* m_statusLanguageLabel;
 };
 
 } // namespace NotepadPlusPlus
