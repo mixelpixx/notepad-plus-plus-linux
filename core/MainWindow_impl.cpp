@@ -447,9 +447,7 @@ void MainWindow::onEditorModified(bool modified)
 
 void MainWindow::onPreferences()
 {
-    m_preferencesDialog->show();
-    m_preferencesDialog->raise();
-    m_preferencesDialog->activateWindow();
+    m_preferencesDialog->exec();
 }
 
 // Encoding menu implementations
