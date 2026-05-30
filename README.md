@@ -72,7 +72,30 @@ Supported languages: C, C++, Python, JavaScript, Java, HTML, CSS, XML, SQL, Bash
 - 10-category preferences dialog
 - Clickable status bar: position, encoding, line ending, language, file size
 
-## Requirements
+## Install
+
+### Snap Store (recommended)
+
+Available in the Ubuntu Software app or install from the command line:
+
+```bash
+sudo snap install notepadplusplus
+```
+
+[![Get it from the Snap Store](https://snapcraft.io/static/images/badges/en/snap-store-black.svg)](https://snapcraft.io/notepadplusplus)
+
+### .deb Package
+
+Download the latest `.deb` from [Releases](https://github.com/mixelpixx/notepad-plus-plus-linux/releases):
+
+```bash
+sudo dpkg -i notepadplusplus-1.2.0-Linux.deb
+sudo apt-get install -f  # if dependencies are missing
+```
+
+### Build from Source
+
+#### Requirements
 
 - Linux (Ubuntu 20.04+ or equivalent)
 - Qt6 (6.0+) or Qt5 (5.15+)
@@ -80,7 +103,7 @@ Supported languages: C, C++, Python, JavaScript, Java, HTML, CSS, XML, SQL, Bash
 - CMake 3.16+
 - GCC 9+ with C++17 support
 
-### Install Dependencies
+#### Dependencies
 
 ```bash
 # Ubuntu/Debian (Qt6)
@@ -90,7 +113,7 @@ sudo apt install qt6-base-dev qt6-base-dev-tools libqscintilla2-qt6-dev cmake bu
 sudo apt install qt5-default libqscintilla2-qt5-dev cmake build-essential
 ```
 
-## Building
+#### Build
 
 ```bash
 git clone https://github.com/mixelpixx/notepad-plus-plus-linux.git
@@ -98,21 +121,7 @@ cd notepad-plus-plus-linux
 mkdir build && cd build
 cmake ..
 make -j$(nproc)
-```
-
-### Install
-
-```bash
 sudo make install
-```
-
-Installs to `/usr/local/bin/notepadplusplus`.
-
-### Debug Build
-
-```bash
-cmake -DCMAKE_BUILD_TYPE=Debug ..
-make -j$(nproc)
 ```
 
 ## Usage
