@@ -7,6 +7,8 @@
 #include "../ui/PreferencesDialog.h"
 #include "../ui/IncrementalSearchBar.h"
 #include "../ui/ClickableLabel.h"
+#include "../ui/FunctionListPanel.h"
+#include "../ui/WorkspacePanel.h"
 #include "../utils/ConfigManager.h"
 #include <QFileDialog>
 #include <QMessageBox>
@@ -419,6 +421,11 @@ void MainWindow::onTabChanged(int index)
     // Update incremental search bar with current editor
     if (m_incrementalSearchBar->isVisible()) {
         m_incrementalSearchBar->setEditor(editor);
+    }
+
+    // Update function list with current editor
+    if (m_functionListPanel->isVisible()) {
+        m_functionListPanel->setEditor(editor);
     }
 }
 
@@ -2446,6 +2453,23 @@ void MainWindow::onStatusLanguageClicked()
         editor->setLanguage(selected->text());
         updateStatusBar();
     }
+}
+
+// --- Panel toggles ---
+
+void MainWindow::onToggleFunctionList()
+{
+    bool visible = m_functionListAction->isChecked();
+    m_functionListPanel->setVisible(visible);
+    if (visible) {
+        m_functionListPanel->setEditor(currentEditor());
+    }
+}
+
+void MainWindow::onToggleWorkspace()
+{
+    bool visible = m_workspaceAction->isChecked();
+    m_workspacePanel->setVisible(visible);
 }
 
 } // namespace NotepadPlusPlus

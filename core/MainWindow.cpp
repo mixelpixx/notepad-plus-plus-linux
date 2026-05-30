@@ -7,6 +7,8 @@
 #include "../ui/PreferencesDialog.h"
 #include "../ui/IncrementalSearchBar.h"
 #include "../ui/ClickableLabel.h"
+#include "../ui/FunctionListPanel.h"
+#include "../ui/WorkspacePanel.h"
 #include "../utils/ConfigManager.h"
 #include <QTabWidget>
 #include <QTabBar>
@@ -101,7 +103,22 @@ void MainWindow::setupUi()
     // Create document map panel
     m_documentMapPanel = new DocumentMapPanel(this);
     addDockWidget(Qt::RightDockWidgetArea, m_documentMapPanel);
-    m_documentMapPanel->hide(); // Hidden by default
+    m_documentMapPanel->hide();
+
+    m_functionListPanel = new FunctionListPanel(this);
+    addDockWidget(Qt::RightDockWidgetArea, m_functionListPanel);
+    m_functionListPanel->hide();
+    connect(m_functionListPanel, &FunctionListPanel::functionSelected,
+            [this](int lineNumber) {
+                EditorWidget* editor = currentEditor();
+                if (editor) editor->gotoLine(lineNumber);
+            });
+
+    m_workspacePanel = new WorkspacePanel(this);
+    addDockWidget(Qt::LeftDockWidgetArea, m_workspacePanel);
+    m_workspacePanel->hide();
+    connect(m_workspacePanel, &WorkspacePanel::fileOpenRequested,
+            this, &MainWindow::openFile);
 
     // Create incremental search bar
     m_incrementalSearchBar = new IncrementalSearchBar(this);
@@ -287,6 +304,14 @@ void MainWindow::createActions()
     m_fullScreenAction->setShortcut(Qt::Key_F11);
     m_fullScreenAction->setCheckable(true);
     m_fullScreenAction->setStatusTip(tr("Toggle full screen mode"));
+
+    m_functionListAction = new QAction(tr("Function &List"), this);
+    m_functionListAction->setCheckable(true);
+    m_functionListAction->setStatusTip(tr("Toggle function list panel"));
+
+    m_workspaceAction = new QAction(tr("&Workspace"), this);
+    m_workspaceAction->setCheckable(true);
+    m_workspaceAction->setStatusTip(tr("Toggle workspace panel"));
 
     m_zoomInAction = new QAction(appIcon("zoom-in"), tr("Zoom &In"), this);
     m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
@@ -615,6 +640,8 @@ void MainWindow::createMenus()
     m_viewMenu->addAction(m_wordWrapAction);
     m_viewMenu->addAction(m_lineNumbersAction);
     m_viewMenu->addAction(m_documentMapAction);
+    m_viewMenu->addAction(m_functionListAction);
+    m_viewMenu->addAction(m_workspaceAction);
     m_viewMenu->addAction(m_smartHighlightAction);
     m_viewMenu->addSeparator();
     m_viewMenu->addAction(m_showWhitespaceAction);
@@ -933,6 +960,8 @@ void MainWindow::connectSignals()
     connect(m_showIndentGuideAction, &QAction::triggered, this, &MainWindow::onToggleShowIndentGuide);
     connect(m_showAllCharsAction, &QAction::triggered, this, &MainWindow::onToggleShowAllChars);
     connect(m_fullScreenAction, &QAction::triggered, this, &MainWindow::onToggleFullScreen);
+    connect(m_functionListAction, &QAction::triggered, this, &MainWindow::onToggleFunctionList);
+    connect(m_workspaceAction, &QAction::triggered, this, &MainWindow::onToggleWorkspace);
     connect(m_zoomInAction, &QAction::triggered, this, &MainWindow::onZoomIn);
     connect(m_zoomOutAction, &QAction::triggered, this, &MainWindow::onZoomOut);
     connect(m_resetZoomAction, &QAction::triggered, this, &MainWindow::onResetZoom);

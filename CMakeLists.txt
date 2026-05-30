@@ -72,6 +72,8 @@ set(SOURCES
     ui/PreferencesDialog.cpp
     ui/IncrementalSearchBar.cpp
     ui/ClickableLabel.cpp
+    ui/FunctionListPanel.cpp
+    ui/WorkspacePanel.cpp
 )
 
 # Header files (for MOC)
@@ -92,6 +94,8 @@ set(HEADERS
     ui/PreferencesDialog.h
     ui/IncrementalSearchBar.h
     ui/ClickableLabel.h
+    ui/FunctionListPanel.h
+    ui/WorkspacePanel.h
 )
 
 # Qt resource files (AUTORCC handles compilation)
