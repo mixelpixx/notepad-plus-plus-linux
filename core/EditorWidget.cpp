@@ -1,6 +1,7 @@
 #include "EditorWidget.h"
 #include <QVBoxLayout>
 #include <QFile>
+#include <QKeyEvent>
 #include <QTextStream>
 #include <QMessageBox>
 #include <QFileInfo>
@@ -31,6 +32,7 @@ EditorWidget::EditorWidget(QWidget *parent)
     , m_lastCaseSensitive(false)
     , m_lastWholeWord(false)
     , m_lastRegex(false)
+    , m_autoCloseBracketsEnabled(true)
     , m_multiEditEnabled(true)
     , m_smartHighlightEnabled(true)
 {
@@ -118,6 +120,9 @@ void EditorWidget::setupEditor()
     m_editor->SendScintilla(QsciScintilla::SCI_SETMULTIPLESELECTION, 1);
     m_editor->SendScintilla(QsciScintilla::SCI_SETADDITIONALSELECTIONTYPING, 1);
     m_editor->SendScintilla(QsciScintilla::SCI_SETMULTIPASTE, 1);  // SC_MULTIPASTE_EACH
+
+    // Auto-close brackets event filter
+    m_editor->installEventFilter(this);
 
     // Apply initial theme
     applyTheme();
@@ -734,6 +739,103 @@ QList<int> EditorWidget::getBookmarkedLines() const
         line = m_editor->markerFindNext(line + 1, 1 << BOOKMARK_MARKER);
     }
     return lines;
+}
+
+// --- Auto-close brackets ---
+
+void EditorWidget::setAutoCloseBracketsEnabled(bool enabled)
+{
+    m_autoCloseBracketsEnabled = enabled;
+}
+
+bool EditorWidget::isAutoCloseBracketsEnabled() const
+{
+    return m_autoCloseBracketsEnabled;
+}
+
+char EditorWidget::getMatchingClose(char ch) const
+{
+    switch (ch) {
+        case '(': return ')';
+        case '[': return ']';
+        case '{': return '}';
+        case '"': return '"';
+        case '\'': return '\'';
+        default: return '\0';
+    }
+}
+
+bool EditorWidget::eventFilter(QObject* obj, QEvent* event)
+{
+    if (obj != m_editor || event->type() != QEvent::KeyPress || !m_autoCloseBracketsEnabled) {
+        return QWidget::eventFilter(obj, event);
+    }
+
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+    QString text = keyEvent->text();
+
+    if (text.isEmpty()) {
+        return QWidget::eventFilter(obj, event);
+    }
+
+    char ch = text[0].toLatin1();
+    int pos = m_editor->SendScintilla(QsciScintilla::SCI_GETCURRENTPOS);
+
+    // Backspace: delete matching pair if cursor is between them
+    if (keyEvent->key() == Qt::Key_Backspace && pos > 0) {
+        char prev = static_cast<char>(m_editor->SendScintilla(QsciScintilla::SCI_GETCHARAT, pos - 1));
+        char next = static_cast<char>(m_editor->SendScintilla(QsciScintilla::SCI_GETCHARAT, pos));
+        char match = getMatchingClose(prev);
+        if (match != '\0' && next == match) {
+            m_editor->SendScintilla(QsciScintilla::SCI_BEGINUNDOACTION);
+            m_editor->SendScintilla(QsciScintilla::SCI_SETSEL, pos - 1, pos + 1);
+            m_editor->SendScintilla(QsciScintilla::SCI_REPLACESEL, 0, (long)"");
+            m_editor->SendScintilla(QsciScintilla::SCI_ENDUNDOACTION);
+            return true;
+        }
+        return QWidget::eventFilter(obj, event);
+    }
+
+    // Closing char: skip over if next char matches
+    if (ch == ')' || ch == ']' || ch == '}') {
+        char next = static_cast<char>(m_editor->SendScintilla(QsciScintilla::SCI_GETCHARAT, pos));
+        if (next == ch) {
+            m_editor->SendScintilla(QsciScintilla::SCI_CHARRIGHT);
+            return true;
+        }
+        return QWidget::eventFilter(obj, event);
+    }
+
+    // Quote chars: skip over if next char matches, or auto-close
+    if (ch == '"' || ch == '\'') {
+        char next = static_cast<char>(m_editor->SendScintilla(QsciScintilla::SCI_GETCHARAT, pos));
+        if (next == ch) {
+            m_editor->SendScintilla(QsciScintilla::SCI_CHARRIGHT);
+            return true;
+        }
+        // Don't auto-close inside words (e.g. don't)
+        if (pos > 0) {
+            char prev = static_cast<char>(m_editor->SendScintilla(QsciScintilla::SCI_GETCHARAT, pos - 1));
+            if (QChar::isLetterOrNumber(prev)) {
+                return QWidget::eventFilter(obj, event);
+            }
+        }
+    }
+
+    // Opening char or quote: insert pair
+    char match = getMatchingClose(ch);
+    if (match != '\0' && !m_editor->hasSelectedText()) {
+        char closing[2] = { match, '\0' };
+        m_editor->SendScintilla(QsciScintilla::SCI_BEGINUNDOACTION);
+        // Let the original char insert
+        QWidget::eventFilter(obj, event);
+        int newPos = m_editor->SendScintilla(QsciScintilla::SCI_GETCURRENTPOS);
+        m_editor->SendScintilla(QsciScintilla::SCI_INSERTTEXT, newPos, reinterpret_cast<long>(closing));
+        m_editor->SendScintilla(QsciScintilla::SCI_ENDUNDOACTION);
+        return true;
+    }
+
+    return QWidget::eventFilter(obj, event);
 }
 
 } // namespace NotepadPlusPlus

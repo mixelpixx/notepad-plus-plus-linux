@@ -26,6 +26,11 @@
 #include <QPixmap>
 #include <QSplitter>
 #include <QDebug>
+#include <QMenuBar>
+#include <QToolBar>
+#include <QMimeData>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <algorithm>
 #include <random>
 #include <QSet>
@@ -966,6 +971,10 @@ EditorWidget* MainWindow::createEditor()
     editor->setShowLineNumbers(m_lineNumbersAction->isChecked());
     editor->setMultiEditEnabled(m_multiEditAction->isChecked());
     editor->setSmartHighlightEnabled(m_smartHighlightAction->isChecked());
+    editor->setShowWhitespace(m_showWhitespaceAction->isChecked());
+    editor->scintilla()->setEolVisibility(m_showEolAction->isChecked());
+    editor->scintilla()->setIndentationGuides(m_showIndentGuideAction->isChecked());
+    editor->setAutoCloseBracketsEnabled(true);
 
     return editor;
 }
@@ -2155,6 +2164,109 @@ void MainWindow::onSecondViewTabCloseRequested(int index)
     m_secondTabWidget->removeTab(index);
     if (m_secondTabWidget->count() == 0 && m_splitViewActive) {
         onCloseSplitView();
+    }
+}
+
+// --- Drag-and-drop ---
+
+void MainWindow::dragEnterEvent(QDragEnterEvent* event)
+{
+    if (event->mimeData()->hasUrls()) {
+        event->acceptProposedAction();
+    }
+}
+
+void MainWindow::dropEvent(QDropEvent* event)
+{
+    const QMimeData* mimeData = event->mimeData();
+    if (mimeData->hasUrls()) {
+        for (const QUrl& url : mimeData->urls()) {
+            if (url.isLocalFile()) {
+                openFile(url.toLocalFile());
+            }
+        }
+        event->acceptProposedAction();
+    }
+}
+
+// --- Show whitespace / EOL / indent guides ---
+
+void MainWindow::onToggleShowWhitespace()
+{
+    bool show = m_showWhitespaceAction->isChecked();
+    for (int i = 0; i < m_tabWidget->count(); ++i) {
+        EditorWidget* editor = getEditor(i);
+        if (editor) editor->setShowWhitespace(show);
+    }
+    if (m_splitViewActive) {
+        for (int i = 0; i < m_secondTabWidget->count(); ++i) {
+            EditorWidget* editor = qobject_cast<EditorWidget*>(m_secondTabWidget->widget(i));
+            if (editor) editor->setShowWhitespace(show);
+        }
+    }
+}
+
+void MainWindow::onToggleShowEol()
+{
+    bool show = m_showEolAction->isChecked();
+    for (int i = 0; i < m_tabWidget->count(); ++i) {
+        EditorWidget* editor = getEditor(i);
+        if (editor) editor->scintilla()->setEolVisibility(show);
+    }
+    if (m_splitViewActive) {
+        for (int i = 0; i < m_secondTabWidget->count(); ++i) {
+            EditorWidget* editor = qobject_cast<EditorWidget*>(m_secondTabWidget->widget(i));
+            if (editor) editor->scintilla()->setEolVisibility(show);
+        }
+    }
+}
+
+void MainWindow::onToggleShowIndentGuide()
+{
+    bool show = m_showIndentGuideAction->isChecked();
+    for (int i = 0; i < m_tabWidget->count(); ++i) {
+        EditorWidget* editor = getEditor(i);
+        if (editor) editor->scintilla()->setIndentationGuides(show);
+    }
+    if (m_splitViewActive) {
+        for (int i = 0; i < m_secondTabWidget->count(); ++i) {
+            EditorWidget* editor = qobject_cast<EditorWidget*>(m_secondTabWidget->widget(i));
+            if (editor) editor->scintilla()->setIndentationGuides(show);
+        }
+    }
+}
+
+void MainWindow::onToggleShowAllChars()
+{
+    bool show = m_showAllCharsAction->isChecked();
+    m_showWhitespaceAction->setChecked(show);
+    m_showEolAction->setChecked(show);
+    onToggleShowWhitespace();
+    onToggleShowEol();
+}
+
+// --- Full screen ---
+
+void MainWindow::onToggleFullScreen()
+{
+    if (m_isFullScreen) {
+        menuBar()->show();
+        m_fileToolBar->show();
+        m_editToolBar->show();
+        m_searchToolBar->show();
+        statusBar()->show();
+        showNormal();
+        m_isFullScreen = false;
+        m_fullScreenAction->setChecked(false);
+    } else {
+        menuBar()->hide();
+        m_fileToolBar->hide();
+        m_editToolBar->hide();
+        m_searchToolBar->hide();
+        statusBar()->hide();
+        showFullScreen();
+        m_isFullScreen = true;
+        m_fullScreenAction->setChecked(true);
     }
 }
 
