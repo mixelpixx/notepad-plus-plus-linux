@@ -18,7 +18,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Find Qt6 (or Qt5 as fallback)
-find_package(Qt6 COMPONENTS Core Widgets Xml QUIET)
+find_package(Qt6 COMPONENTS Core Widgets Xml PrintSupport QUIET)
 if(Qt6_FOUND)
     find_package(Qt6Svg QUIET)
     set(Qt6_FOUND TRUE)
@@ -74,6 +74,7 @@ set(SOURCES
     ui/ClickableLabel.cpp
     ui/FunctionListPanel.cpp
     ui/WorkspacePanel.cpp
+    ui/DocumentSwitcher.cpp
 )
 
 # Header files (for MOC)
@@ -96,6 +97,7 @@ set(HEADERS
     ui/ClickableLabel.h
     ui/FunctionListPanel.h
     ui/WorkspacePanel.h
+    ui/DocumentSwitcher.h
 )
 
 # Qt resource files (AUTORCC handles compilation)
@@ -109,17 +111,17 @@ add_executable(notepadplusplus ${SOURCES} ${HEADERS} ${RESOURCES})
 # Link Qt libraries
 if(Qt6_FOUND)
     if(Qt6Svg_FOUND)
-        target_link_libraries(notepadplusplus Qt6::Core Qt6::Widgets Qt6::Xml Qt6::Svg ${QSCINTILLA_LIBRARY})
+        target_link_libraries(notepadplusplus Qt6::Core Qt6::Widgets Qt6::Xml Qt6::Svg Qt6::PrintSupport ${QSCINTILLA_LIBRARY})
         message(STATUS "Qt6::Svg linked - SVG icons enabled")
     else()
-        target_link_libraries(notepadplusplus Qt6::Core Qt6::Widgets Qt6::Xml ${QSCINTILLA_LIBRARY})
+        target_link_libraries(notepadplusplus Qt6::Core Qt6::Widgets Qt6::Xml Qt6::PrintSupport ${QSCINTILLA_LIBRARY})
         message(STATUS "Qt6::Svg not found - SVG icons may not render")
     endif()
     target_include_directories(notepadplusplus PRIVATE
         /usr/include/${MULTIARCH}/qt6
     )
 else()
-    target_link_libraries(notepadplusplus Qt5::Core Qt5::Widgets Qt5::Xml ${QSCINTILLA_LIBRARY})
+    target_link_libraries(notepadplusplus Qt5::Core Qt5::Widgets Qt5::Xml Qt5::PrintSupport ${QSCINTILLA_LIBRARY})
 endif()
 
 # Compiler flags

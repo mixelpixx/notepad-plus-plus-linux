@@ -9,6 +9,11 @@
 #include "../ui/ClickableLabel.h"
 #include "../ui/FunctionListPanel.h"
 #include "../ui/WorkspacePanel.h"
+#include "../ui/DocumentSwitcher.h"
+#include <Qsci/qsciprinter.h>
+#include <QPrintDialog>
+#include <QPrintPreviewDialog>
+#include <QKeyEvent>
 #include "../utils/ConfigManager.h"
 #include <QFileDialog>
 #include <QMessageBox>
@@ -2470,6 +2475,106 @@ void MainWindow::onToggleWorkspace()
 {
     bool visible = m_workspaceAction->isChecked();
     m_workspacePanel->setVisible(visible);
+}
+
+// --- Document switcher ---
+
+void MainWindow::keyPressEvent(QKeyEvent* event)
+{
+    if (event->key() == Qt::Key_Tab && (event->modifiers() & Qt::ControlModifier)) {
+        onShowDocumentSwitcher();
+        event->accept();
+        return;
+    }
+    if (event->key() == Qt::Key_Escape && m_isFullScreen) {
+        onToggleFullScreen();
+        event->accept();
+        return;
+    }
+    QMainWindow::keyPressEvent(event);
+}
+
+void MainWindow::onShowDocumentSwitcher()
+{
+    QList<DocumentInfo> docs;
+
+    for (int i = 0; i < m_tabWidget->count(); ++i) {
+        EditorWidget* editor = getEditor(i);
+        if (editor) {
+            DocumentInfo info;
+            info.title = m_tabWidget->tabText(i);
+            info.path = editor->getFilePath();
+            info.index = i;
+            info.modified = editor->isModified();
+            info.isSecondView = false;
+            docs.append(info);
+        }
+    }
+
+    if (m_splitViewActive) {
+        for (int i = 0; i < m_secondTabWidget->count(); ++i) {
+            EditorWidget* editor = qobject_cast<EditorWidget*>(m_secondTabWidget->widget(i));
+            if (editor) {
+                DocumentInfo info;
+                info.title = m_secondTabWidget->tabText(i);
+                info.path = editor->getFilePath();
+                info.index = i;
+                info.modified = editor->isModified();
+                info.isSecondView = true;
+                docs.append(info);
+            }
+        }
+    }
+
+    if (docs.size() < 2) return;
+
+    m_documentSwitcher->setDocuments(docs);
+    m_documentSwitcher->move(geometry().center() - m_documentSwitcher->rect().center());
+    if (m_documentSwitcher->exec() == QDialog::Accepted) {
+        int index = m_documentSwitcher->getSelectedIndex();
+        if (m_documentSwitcher->isSecondView()) {
+            m_secondTabWidget->setCurrentIndex(index);
+        } else {
+            m_tabWidget->setCurrentIndex(index);
+        }
+    }
+}
+
+// --- Print ---
+
+void MainWindow::onPrint()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QsciPrinter printer(QPrinter::HighResolution);
+    if (!editor->getFilePath().isEmpty()) {
+        printer.setDocName(editor->getFilePath());
+    }
+
+    QPrintDialog dialog(&printer, this);
+    if (dialog.exec() == QDialog::Accepted) {
+        printer.printRange(editor->scintilla());
+    }
+}
+
+void MainWindow::onPrintPreview()
+{
+    EditorWidget* editor = currentEditor();
+    if (!editor) return;
+
+    QPrinter printer(QPrinter::HighResolution);
+    QPrintPreviewDialog preview(&printer, this);
+
+    connect(&preview, &QPrintPreviewDialog::paintRequested,
+            [editor](QPrinter* p) {
+                QsciPrinter qp;
+                qp.setOutputFormat(p->outputFormat());
+                qp.setPageLayout(p->pageLayout());
+                qp.printRange(editor->scintilla());
+            });
+
+    preview.exec();
 }
 
 } // namespace NotepadPlusPlus

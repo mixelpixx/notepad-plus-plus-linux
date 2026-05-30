@@ -25,6 +25,7 @@ class IncrementalSearchBar;
 class ClickableLabel;
 class FunctionListPanel;
 class WorkspacePanel;
+class DocumentSwitcher;
 
 class MainWindow : public QMainWindow
 {
@@ -69,6 +70,8 @@ private slots:
     void onSaveAsFile();
     void onCloseFile();
     void onCloseAllFiles();
+    void onPrint();
+    void onPrintPreview();
     void onExit();
     
     // Edit menu actions
@@ -159,6 +162,7 @@ private slots:
     void onStatusLineEndingClicked();
     void onStatusLanguageClicked();
     void onStatusPositionClicked();
+    void onShowDocumentSwitcher();
     
     // Encoding menu actions
     void onEncodingUTF8();
@@ -211,6 +215,7 @@ protected:
     void closeEvent(QCloseEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dropEvent(QDropEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
     
 private:
     void setupUi();
@@ -251,6 +256,7 @@ private:
     FunctionListPanel* m_functionListPanel;
     WorkspacePanel* m_workspacePanel;
     IncrementalSearchBar* m_incrementalSearchBar;
+    DocumentSwitcher* m_documentSwitcher;
     
     // Menus
     QMenu* m_fileMenu;
@@ -281,6 +287,8 @@ private:
     QAction* m_saveAllAction;
     QAction* m_closeAction;
     QAction* m_closeAllAction;
+    QAction* m_printAction;
+    QAction* m_printPreviewAction;
     QAction* m_exitAction;
     
     QAction* m_undoAction;
