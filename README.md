@@ -16,11 +16,13 @@ Notepad++ Linux brings the core features of Notepad++ to Linux without Wine or c
 - Multi-tab interface with closable, movable, reorderable tabs
 - Multi-cursor editing (Ctrl+Click to add cursors, type at all positions)
 - Column/block selection (Alt+Drag or Alt+Shift+Arrows)
+- Auto-close brackets and quotes with skip-over and backspace pair delete
 - Smart highlighting of all occurrences of a selected word
 - Line operations: sort, remove duplicates, remove blank lines, join, split, move, duplicate, reverse
 - Case conversion: UPPERCASE, lowercase, Title Case, Sentence case, iNVERT cAsE
 - Code folding, brace matching, auto-indent, auto-completion
 - Word wrap, zoom, current line highlighting
+- Drag-and-drop file opening from file manager
 
 ### Search
 - Find and replace with regular expression support
@@ -28,16 +30,23 @@ Notepad++ Linux brings the core features of Notepad++ to Linux without Wine or c
 - Incremental search bar with live match highlighting and count (Ctrl+Alt+I)
 - Bookmarks: toggle (Ctrl+F2), navigate (F2/Shift+F2), cut/copy/delete/paste bookmarked lines
 - Go to line (Ctrl+G)
+- Document switcher (Ctrl+Tab) with all open tabs
 
 ### Split View
 - Horizontal and vertical split editing
 - Move or clone documents between views
 - Switch focus between views (F8)
 
+### Panels
+- Function List: navigate functions, classes, and methods by language
+- Folder as Workspace: directory tree with file operations
+- Document map (minimap)
+
 ### Syntax Highlighting
 Supported languages: C, C++, Python, JavaScript, Java, HTML, CSS, XML, SQL, Bash, JSON, YAML, Perl
 
 ### Tools
+- Print and print preview with syntax highlighting (Ctrl+P)
 - Macro recording, playback, and persistent storage with keyboard shortcuts
 - Word count and text statistics
 - Line ending conversion (CRLF, LF, CR)
@@ -47,9 +56,9 @@ Supported languages: C, C++, Python, JavaScript, Java, HTML, CSS, XML, SQL, Bash
 - Launch HTML in browser
 
 ### Document Management
+- Tab context menu: close, close others, copy path, rename, reveal in folder
 - Session persistence and restore
 - Recent files tracking
-- Document map (minimap) panel
 - External file modification detection
 - Encoding support: UTF-8, UTF-16, ANSI
 - Backup and auto-save system
@@ -57,9 +66,11 @@ Supported languages: C, C++, Python, JavaScript, Java, HTML, CSS, XML, SQL, Bash
 
 ### Appearance
 - Themes: Light, Dark, Monokai
+- Full-screen / distraction-free mode (F11)
+- Show whitespace, end-of-line characters, indent guides
 - Customizable fonts and colors
 - 10-category preferences dialog
-- Status bar with cursor position, selection length, file size, encoding
+- Clickable status bar: position, encoding, line ending, language, file size
 
 ## Requirements
 
@@ -119,11 +130,13 @@ make -j$(nproc)
 | Open | Ctrl+O |
 | Save | Ctrl+S |
 | Close | Ctrl+W |
+| Print | Ctrl+P |
 | Find | Ctrl+F |
 | Replace | Ctrl+H |
 | Find in Files | Ctrl+Shift+F |
 | Incremental Search | Ctrl+Alt+I |
 | Go to Line | Ctrl+G |
+| Document Switcher | Ctrl+Tab |
 | Toggle Bookmark | Ctrl+F2 |
 | Next Bookmark | F2 |
 | Previous Bookmark | Shift+F2 |
@@ -131,15 +144,13 @@ make -j$(nproc)
 | Move Line Up/Down | Alt+Up/Down |
 | UPPERCASE | Ctrl+Shift+U |
 | lowercase | Ctrl+U |
+| Full Screen | F11 |
 | Zoom In/Out | Ctrl+Plus/Minus |
 | Reset Zoom | Ctrl+0 |
 | Start Macro | Ctrl+Shift+R |
 | Play Macro | Ctrl+Shift+P |
 | Focus Other View | F8 |
 | Run Command | F5 |
-| Run Python | Ctrl+F1 |
-| Run JavaScript | Ctrl+F2 |
-| Compile and Run | Ctrl+F5 |
 
 ## Project Structure
 
@@ -156,6 +167,10 @@ ui/                 UI components
   FindInFilesDialog.cpp
   IncrementalSearchBar.cpp
   DocumentMapPanel.cpp
+  FunctionListPanel.cpp
+  WorkspacePanel.cpp
+  DocumentSwitcher.cpp
+  ClickableLabel.cpp
   PreferencesDialog.cpp
 utils/              Utilities
   ConfigManager.cpp Settings persistence

@@ -2,6 +2,27 @@
 
 All notable changes to Notepad++ Linux will be documented in this file.
 
+## [1.2.0] - 2026-05-29
+
+### Added
+- Auto-close brackets and quotes with skip-over for closing chars and backspace pair deletion
+- Tab context menu: Close, Close Others, Close to Left/Right, Copy Path/Filename/Directory, Open Containing Folder, Rename, Move to Other View
+- Drag-and-drop file opening from file managers
+- Show whitespace, end-of-line characters, indent guides, and show all characters toggles in View menu
+- Full-screen / distraction-free mode (F11, Escape to exit)
+- Function List panel: dockable side panel listing functions, classes, and methods with language-specific parsers for C/C++, Python, JavaScript, Java, Bash, and Perl
+- Folder as Workspace panel: directory tree with file watcher, context menu for New File/Folder, Rename, Delete, Copy Path, Open in Terminal
+- Clickable status bar: click position for Go To Line, click encoding/line ending/language for quick switching via popup menus
+- Line ending and language indicators added to status bar
+- Document switcher (Ctrl+Tab): popup showing all open tabs with release-to-select
+- Print support (Ctrl+P) with syntax-highlighted output via QsciPrinter
+- Print preview dialog
+
+### Changed
+- Status bar widgets replaced with ClickableLabel for interactive behavior
+- Version updated to 1.2.0
+- Qt PrintSupport module now linked
+
 ## [1.1.0] - 2026-05-29
 
 ### Added

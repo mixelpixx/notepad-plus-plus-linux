@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     // Set application metadata
     QCoreApplication::setOrganizationName("Notepad++");
     QCoreApplication::setApplicationName("Notepad++ Linux");
-    QCoreApplication::setApplicationVersion("1.1.0");
+    QCoreApplication::setApplicationVersion("1.2.0");
     app.setWindowIcon(QIcon(":/images/notepad++linux3_600.png"));
     
     // Load translations
