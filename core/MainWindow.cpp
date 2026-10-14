@@ -98,6 +98,36 @@ void MainWindow::setupUi()
 
     // Create dialogs and panels
     m_findReplaceDialog = std::make_unique<FindReplaceDialog>(this);
+
+    auto search = [this](const QString& text, bool cs, bool ww,
+                         bool re, bool forward) {
+        EditorWidget* editor = currentEditor();
+        if (!editor || text.isEmpty()) return;
+
+        auto* sci = editor->scintilla();
+        int line, index;
+        sci->getCursorPosition(&line, &index);
+
+        if (sci->hasSelectedText()) {
+            int sl, si, el, ei;
+            sci->getSelection(&sl, &si, &el, &ei);
+            line = forward ? el : sl;
+            index = forward ? ei : si;
+        }
+
+        sci->findFirst(text, re, cs, ww, true,
+                       forward, line, index);
+    };
+
+    connect(m_findReplaceDialog.get(), &FindReplaceDialog::findNext,
+            this, [search](const QString& t, bool c, bool w, bool r) {
+                search(t, c, w, r, true);
+            });
+
+    connect(m_findReplaceDialog.get(), &FindReplaceDialog::findPrevious,
+            this, [search](const QString& t, bool c, bool w, bool r) {
+                search(t, c, w, r, false);
+            });
     m_findInFilesDialog = std::make_unique<FindInFilesDialog>(this);
     m_preferencesDialog = std::make_unique<PreferencesDialog>(this);
     
