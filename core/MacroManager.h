@@ -226,10 +226,10 @@ private slots:
      * @brief Handle macro recording events from Scintilla
      * @param message Scintilla message ID
      * @param wParam First parameter
-     * @param lParam Second parameter
-     * @param text String parameter (may be nullptr)
+     * @param lParam Second parameter; points to the text for text messages and
+     *               is only valid during the notification
      */
-    void onMacroRecord(int message, unsigned long wParam, long lParam, const char* text);
+    void onMacroRecord(unsigned int message, unsigned long wParam, void* lParam);
 
 private:
     /**

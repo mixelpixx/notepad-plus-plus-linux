@@ -131,7 +131,7 @@ signals:
     void textChanged();
     void fileLoaded(const QString& filePath);
     void fileSaved(const QString& filePath);
-    void macroRecordEvent(int message, unsigned long wParam, long lParam, const char* text);
+    void macroRecordEvent(unsigned int message, unsigned long wParam, void* lParam);
 
 protected:
     bool eventFilter(QObject* obj, QEvent* event) override;

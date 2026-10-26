@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QCoreApplication>
 #include <Qsci/qsciscintilla.h>
+#include <cstdint>
 
 // Scintilla message constants
 #define SCI_STARTRECORD 3001
@@ -319,7 +320,28 @@ void MacroManager::setActiveEditor(EditorWidget* editor)
 // Private Slots
 // ============================================================================
 
-void MacroManager::onMacroRecord(int message, unsigned long wParam, long lParam, const char* text)
+namespace {
+
+// Messages whose lParam in SCN_MACRORECORD is a pointer to text rather than a
+// numeric argument.
+bool macroMessageCarriesText(unsigned int message)
+{
+    switch (message) {
+    case QsciScintilla::SCI_ADDTEXT:
+    case QsciScintilla::SCI_ADDSTYLEDTEXT:
+    case QsciScintilla::SCI_INSERTTEXT:
+    case QsciScintilla::SCI_REPLACESEL:
+    case QsciScintilla::SCI_SETTEXT:
+    case QsciScintilla::SCI_APPENDTEXT:
+        return true;
+    default:
+        return false;
+    }
+}
+
+} // namespace
+
+void MacroManager::onMacroRecord(unsigned int message, unsigned long wParam, void* lParam)
 {
     if (m_state != RECORDING) {
         return;  // Ignore if not recording
@@ -333,13 +355,15 @@ void MacroManager::onMacroRecord(int message, unsigned long wParam, long lParam,
     // Create action
     MacroAction action;
     action.type = 1;  // Scintilla message
-    action.message = static_cast<unsigned int>(message);
+    action.message = message;
     action.wParam = wParam;
-    action.lParam = lParam;
 
-    // Capture text parameter if provided
-    if (text && text[0] != '\0') {
-        action.sParam = QString::fromUtf8(text);
+    if (macroMessageCarriesText(message) && lParam) {
+        // The pointer is only valid during this notification and the connection
+        // is direct, so copy the payload right away.
+        action.sParam = QString::fromUtf8(static_cast<const char*>(lParam));
+    } else {
+        action.lParam = static_cast<long>(reinterpret_cast<intptr_t>(lParam));
     }
 
     m_recordingBuffer.append(action);

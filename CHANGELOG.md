@@ -2,6 +2,13 @@
 
 All notable changes to Notepad++ Linux will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+- Macro recording: the `SCN_MACRORECORD` notification was connected with a signature that
+  QScintilla never emits, so every recording captured zero actions. The signal now matches
+  QScintilla's signature and text payloads are copied out of `lParam` before playback.
+
 ## [1.2.0] - 2026-05-29
 
 ### Added

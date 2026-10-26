@@ -133,10 +133,12 @@ void EditorWidget::connectEditorSignals()
     connect(m_editor, &QsciScintilla::modificationChanged,
             this, &EditorWidget::modificationChanged);
 
-    // Connect macro recording notification
-    // Note: QScintilla sends SCN_MACRORECORD via the SCEN_CHANGE signal
-    connect(m_editor, SIGNAL(SCN_MACRORECORD(int,unsigned long,long,const char*)),
-            this, SIGNAL(macroRecordEvent(int,unsigned long,long,const char*)));
+    // Connect macro recording notification. The signature must match QScintilla's
+    // SCN_MACRORECORD signal exactly, otherwise the connection silently fails.
+    // For text messages lParam points to the text and is only valid while the
+    // notification is being delivered.
+    connect(m_editor, &QsciScintilla::SCN_MACRORECORD,
+            this, &EditorWidget::macroRecordEvent);
     connect(m_editor, &QsciScintilla::textChanged,
             this, &EditorWidget::textChanged);
     connect(m_editor, &QsciScintilla::cursorPositionChanged,
