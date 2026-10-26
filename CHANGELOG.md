@@ -2,6 +2,14 @@
 
 All notable changes to Notepad++ Linux will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+- Auto-close brackets and quotes: typing `(`, `[`, `{`, `"` or `'` inserted only the closing
+  character because the key event was consumed without inserting the opening character.
+  The pair is now inserted in a single undoable operation with the caret placed between
+  the two characters.
+
 ## [1.2.0] - 2026-05-29
 
 ### Added

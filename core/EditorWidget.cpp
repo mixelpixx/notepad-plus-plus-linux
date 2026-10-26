@@ -789,7 +789,7 @@ bool EditorWidget::eventFilter(QObject* obj, QEvent* event)
         if (match != '\0' && next == match) {
             m_editor->SendScintilla(QsciScintilla::SCI_BEGINUNDOACTION);
             m_editor->SendScintilla(QsciScintilla::SCI_SETSEL, pos - 1, pos + 1);
-            m_editor->SendScintilla(QsciScintilla::SCI_REPLACESEL, 0, (long)"");
+            m_editor->SendScintilla(QsciScintilla::SCI_REPLACESEL, "");
             m_editor->SendScintilla(QsciScintilla::SCI_ENDUNDOACTION);
             return true;
         }
@@ -825,12 +825,14 @@ bool EditorWidget::eventFilter(QObject* obj, QEvent* event)
     // Opening char or quote: insert pair
     char match = getMatchingClose(ch);
     if (match != '\0' && !m_editor->hasSelectedText()) {
-        char closing[2] = { match, '\0' };
+        // This filter consumes the key event, so Scintilla never inserts the opening
+        // character itself. Insert both characters in one operation instead.
+        char pair[3] = { ch, match, '\0' };
+        const char* pairText = pair;
         m_editor->SendScintilla(QsciScintilla::SCI_BEGINUNDOACTION);
-        // Let the original char insert
-        QWidget::eventFilter(obj, event);
-        int newPos = m_editor->SendScintilla(QsciScintilla::SCI_GETCURRENTPOS);
-        m_editor->SendScintilla(QsciScintilla::SCI_INSERTTEXT, newPos, reinterpret_cast<long>(closing));
+        m_editor->SendScintilla(QsciScintilla::SCI_REPLACESEL, pairText);
+        m_editor->SendScintilla(QsciScintilla::SCI_GOTOPOS,
+                                static_cast<unsigned long>(pos + 1));
         m_editor->SendScintilla(QsciScintilla::SCI_ENDUNDOACTION);
         return true;
     }
