@@ -87,12 +87,26 @@ make -j$(nproc)
 ## CMake Options
 
 ### Qt Version Selection
-```bash
-# Force Qt5 usage
-cmake -DUSE_QT5=ON ..
 
-# Force Qt6 usage (default if available)
-cmake -DUSE_QT6=ON ..
+There is no `USE_QT5`/`USE_QT6` switch. `CMakeLists.txt` probes for Qt6 first and
+falls back to Qt 5.15 automatically:
+
+- Qt6 is used when the `Core`, `Widgets`, `Xml` and `PrintSupport` components are
+  found.
+- Otherwise CMake requires Qt 5.15 (`Core`, `Widgets`, `Xml`). The build also links
+  `Qt5::PrintSupport`, which ships with `qtbase5-dev` on Ubuntu/Debian.
+
+The selected version is printed during configuration:
+
+```
+-- Using Qt6
+```
+
+To build against a specific Qt installation, point CMake at its config directory:
+
+```bash
+# Build against a Qt6 installation outside the default search path
+cmake -DQt6_DIR=/path/to/qt6/lib/cmake/Qt6 ..
 ```
 
 ### Build Configuration
@@ -157,12 +171,25 @@ cpack -G RPM
 
 #### Qt6 Not Found
 ```bash
-# Manually specify Qt6 path
+# Manually specify the Qt6 config directory
 cmake -DQt6_DIR=/usr/lib/x86_64-linux-gnu/cmake/Qt6 ..
 
-# Or use Qt5 instead
-cmake -DUSE_QT5=ON ..
+# Or install the Qt5 fallback dependencies and configure again
+sudo apt install qtbase5-dev libqscintilla2-qt5-dev
+cmake ..
 ```
+
+#### Qt5::PrintSupport Not Found
+```
+CMake Error at CMakeLists.txt:124 (target_link_libraries):
+  Target "notepadplusplus" links to:
+    Qt5::PrintSupport
+  but the target was not found.
+```
+
+The Qt5 branch links `Qt5::PrintSupport`, so `PrintSupport` must be listed in the
+`find_package(Qt5 5.15 COMPONENTS ...)` call. If the component list only contains
+`Core Widgets Xml`, add `PrintSupport` and configure again.
 
 #### QScintilla Not Found
 ```bash
@@ -170,8 +197,9 @@ cmake -DUSE_QT5=ON ..
 dpkg -l | grep qscintilla  # Ubuntu/Debian
 rpm -qa | grep qscintilla  # Fedora/RHEL
 
-# Manual path specification
-cmake -DQScintilla_DIR=/usr/lib/x86_64-linux-gnu/cmake/QScintilla2 ..
+# Manual path specification: point CMake at the library itself
+# (CMakeLists.txt uses find_library(QSCINTILLA_LIBRARY ...))
+cmake -DQSCINTILLA_LIBRARY=/usr/lib/x86_64-linux-gnu/libqscintilla2_qt6.so ..
 ```
 
 #### Missing Dependencies
